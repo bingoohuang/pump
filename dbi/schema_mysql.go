@@ -143,6 +143,7 @@ func (m MySQLSchema) Pump(table string, config model.PumpConfig) error {
 	columnsCount := len(columns)
 	colValues := make([]interface{}, 0, columnsCount)
 
+	t0 := time.Now()
 	t := time.Now()
 	for i := 1; i <= rows; i++ {
 		colValues = colValues[0:0]
@@ -152,13 +153,13 @@ func (m MySQLSchema) Pump(table string, config model.PumpConfig) error {
 		batch.Add(colValues)
 
 		if i%10000 == 0 {
-			fmt.Printf("batch %d rows added, cost %s\n", i, time.Since(t).String())
+			fmt.Printf("batch %d rows added, cost %v\n", i, time.Since(t))
 			t = time.Now()
 		}
 	}
 
 	batch.Complete()
-	fmt.Printf("complete! total %d rows added\n", rows)
+	fmt.Printf("complete! total %d rows added, cost %v\n", rows, time.Since(t0))
 
 	return nil
 }

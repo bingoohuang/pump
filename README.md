@@ -6,18 +6,31 @@ pump random data into tables
 $ pump git:(master) ./pump -h
 Built on 2019-07-02 12:40:30 +0800 by go version go1.12.6 darwin/amd64 from sha1 2019-07-01 22:30:39 +0800 @b10916c8696bba63d9de402f4a9e2f5b3da6d3af @
   -b, --batch int           batch rows (default 1000)
-  -d, --datasource string   help (default "user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local")
+  -d, --datasource string   help (default "user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s")
   -g, --goroutines int      go routines to pump for each table (default 3)
   -h, --help                help
       --pprof-addr string   pprof address to listen on, not activate pprof if empty, eg. --pprof-addr localhost:6060
   -r, --rows int            pump rows (default 1000)
   -t, --tables string       pump tables
 
-./pump -d "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local" -t test_ecdocument_signatory_uuid -r 100000
+./pump -d "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s" -t test_ecdocument_signatory_uuid -r 100000
 test_ecdocument_signatory_uuid pumped 334(100.00%) rows cost 689ms/5m10s901ms
 
-./pump -d "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local" -t test_ecdocument_signatory_snow -r 100000
+./pump -d "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s" -t test_ecdocument_signatory_snow -r 100000
 test_ecdocument_signatory_snow pumped 333(100.00%) rows cost 561ms/3m55s771ms
+```
+
+局域网数据库，速度快很多：
+
+```bash
+[betaoper@beta-hetong pumptool]$ tail uuid.out
+test_ecdocument_signatory_uuid pumped 1000(98.67%) rows cost 873ms/1m56s64ms
+test_ecdocument_signatory_uuid pumped 1000(99.67%) rows cost 837ms/1m56s901ms
+test_ecdocument_signatory_uuid pumped 334(100.00%) rows cost 290ms/1m57s192ms
+[betaoper@beta-hetong pumptool]$ tail snow.out
+test_ecdocument_signatory_snow pumped 1000(99.33%) rows cost 582ms/1m11s614ms
+test_ecdocument_signatory_snow pumped 333(99.67%) rows cost 153ms/1m11s768ms
+test_ecdocument_signatory_snow pumped 333(100.00%) rows cost 143ms/1m11s912ms
 ```
 
 

@@ -16,27 +16,23 @@ type InsertBatcher struct {
 	db          *gorm.DB
 	batchSQL    string
 	completeSQL func() string
+	batchOp     func(int)
 }
 
-func NewInsertBatch(table string, columnNames []string, batchNum int, db *gorm.DB) *InsertBatcher {
-	b := &InsertBatcher{batchNum: batchNum, db: db}
+func NewInsertBatch(table string, columnNames []string,
+	batchNum int, db *gorm.DB, batchOp func(int)) *InsertBatcher {
+	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
+	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 
-	b.columnCount = len(columnNames)
-	mark := make([]string, b.columnCount)
-	for i := range columnNames {
-		mark[i] = "?"
-	}
-
-	bind := "(" + strings.Join(mark, ",") + ")"
-	b.clearBatch()
-
+	bind := "(" + util.Repeat("?", ",", b.columnCount) + ")"
 	sql := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
 	b.batchSQL = sql + util.Repeat(bind, ",", batchNum)
 	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
+	b.batchOp = batchOp
 	return b
 }
 
-func (b *InsertBatcher) Add(colValues []interface{}) {
+func (b *InsertBatcher) AddRow(colValues []interface{}) {
 	b.rowsCount++
 	b.rows = append(b.rows, colValues...)
 
@@ -45,19 +41,18 @@ func (b *InsertBatcher) Add(colValues []interface{}) {
 	}
 }
 
-func (b *InsertBatcher) Complete() {
-	if b.rowsCount > 0 {
+func (b *InsertBatcher) Complete() int {
+	left := b.rowsCount
+	if left > 0 {
 		b.executeBatch(b.completeSQL())
 	}
+
+	return left
 }
 
 func (b *InsertBatcher) executeBatch(sql string) {
 	b.db.Exec(sql, b.rows...)
-
-	b.clearBatch()
-}
-
-func (b *InsertBatcher) clearBatch() {
+	b.batchOp(b.rowsCount)
 	b.rowsCount = 0
-	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
+	b.rows = b.rows[0:0]
 }

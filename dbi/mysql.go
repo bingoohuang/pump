@@ -2,7 +2,6 @@ package dbi
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"reflect"
 	"regexp"
@@ -67,8 +66,8 @@ func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer util.Closeq(db)
+
 	return &MySQLSchema{dbFn: dbFn, pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`)}, err
 }
 
@@ -97,8 +96,8 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	defer util.Closeq(db)
+
 	columns := make([]MyTableColumn, 0)
 	s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
 		`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
@@ -113,7 +112,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	return ts, db.Error
 }
 
-func (m MySQLSchema) Pump(table string, config model.PumpConfig) error {
+func (m MySQLSchema) Pump(table string, rowsPumped chan model.RowsPumped, config model.PumpConfig) error {
 	columns, err := m.TableColumns(table)
 	if err != nil {
 		return err
@@ -135,32 +134,22 @@ func (m MySQLSchema) Pump(table string, config model.PumpConfig) error {
 	}
 	defer util.Closeq(db)
 
-	rows := config.RandRows()
-	fmt.Printf("begin to pump %d rows to table %s\n", rows, table)
-
-	batch := NewInsertBatch(table, columnNames, 100, db)
-
-	columnsCount := len(columns)
-	colValues := make([]interface{}, 0, columnsCount)
-
-	t0 := time.Now()
 	t := time.Now()
-	for i := 1; i <= rows; i++ {
-		colValues = colValues[0:0]
-		for _, col := range columns {
-			colValues = append(colValues, columnsValueRand[col.GetName()].Value())
-		}
-		batch.Add(colValues)
+	rows := config.RandRows()
+	batch := NewInsertBatch(table, columnNames, config.BatchNum, db, func(rows int) {
+		rowsPumped <- model.RowsPumped{Table: table, Rows: rows, Cost: time.Since(t)}
+		t = time.Now()
+	})
+	colValues := make([]interface{}, len(columns))
 
-		if i%10000 == 0 {
-			fmt.Printf("batch %d rows added, cost %v\n", i, time.Since(t))
-			t = time.Now()
+	for i := 1; i <= rows; i++ {
+		for j, col := range columns {
+			colValues[j] = columnsValueRand[col.GetName()].Value()
 		}
+		batch.AddRow(colValues)
 	}
 
 	batch.Complete()
-	fmt.Printf("complete! total %d rows added, cost %v\n", rows, time.Since(t0))
-
 	return nil
 }
 

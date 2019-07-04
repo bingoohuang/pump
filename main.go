@@ -15,6 +15,7 @@ func main() {
 	util.InitFlags()
 
 	app := MakeApp()
+	app.executeSqls()
 	app.pumpingTables()
 }
 
@@ -57,24 +58,7 @@ func (a *App) pumpingTables() {
 		rows[pumpTable] = &model.RowsPumped{Table: pumpTable, TotalRows: a.totalRows}
 		complete[pumpTable] = false
 
-		routineRows0 := 0
-		routineRows := 0
-		if a.totalRows < a.pumpRoutines {
-			routineRows = a.totalRows
-			routineRows0 = a.totalRows
-			a.pumpRoutines = 1
-		} else {
-			routineRows = a.totalRows / a.pumpRoutines
-			routineRows0 = routineRows + a.totalRows - routineRows*a.pumpRoutines
-		}
-
-		for i := 0; i < a.pumpRoutines; i++ {
-			rows := routineRows
-			if i == 0 {
-				rows = routineRows0
-			}
-			go a.pump(pumpTable, rows)
-		}
+		a.pumpTable(pumpTable)
 	}
 
 	for r := range a.pumpedRows {
@@ -83,11 +67,33 @@ func (a *App) pumpingTables() {
 
 		if pumped.Rows == a.totalRows {
 			delete(rows, r.Table)
-			if len(rows) == 0 {
-				break
-			}
+		}
+		if len(rows) == 0 {
+			break
 		}
 	}
+}
+
+func (a *App) pumpTable(table string) {
+	routineRows0, routineRows := a.routineRows()
+
+	go a.pump(table, routineRows0)
+	for i := 1; i < a.pumpRoutines; i++ {
+		go a.pump(table, routineRows)
+	}
+}
+
+func (a *App) routineRows() (routineRows0, routineRows int) {
+	if a.totalRows < a.pumpRoutines {
+		routineRows = a.totalRows
+		routineRows0 = a.totalRows
+		a.pumpRoutines = 1
+	} else {
+		routineRows = a.totalRows / a.pumpRoutines
+		routineRows0 = routineRows + a.totalRows - routineRows*a.pumpRoutines
+	}
+
+	return routineRows0, routineRows
 }
 
 func (a *App) pump(pumpTable string, rows int) {

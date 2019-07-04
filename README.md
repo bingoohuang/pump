@@ -2,6 +2,8 @@
 pump random data into tables
 
 
+Directly by command arguments:
+
 ```bash
 $ pump git:(master) ./pump -h
 Built on 2019-07-02 12:40:30 +0800 by go version go1.12.6 darwin/amd64 from sha1 2019-07-01 22:30:39 +0800 @b10916c8696bba63d9de402f4a9e2f5b3da6d3af @
@@ -18,6 +20,14 @@ test_ecdocument_signatory_uuid pumped 334(100.00%) rows cost 689ms/5m10s901ms
 
 ./pump -d "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s" -t test_ecdocument_signatory_snow -r 100000
 test_ecdocument_signatory_snow pumped 333(100.00%) rows cost 561ms/3m55s771ms
+```
+
+or by ENV variables:
+
+```bash
+export PUMP_DATASOURCE="xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s"
+export PUMP_TABLES="sc_ecdocument,sc_ecdocument_signatory"
+./pump -r 100000
 ```
 
 局域网数据库，速度快很多：

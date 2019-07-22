@@ -1,14 +1,14 @@
 package main
 
 import (
-	"github.com/bingoohuang/gou"
-	"github.com/bingoohuang/pump/durafmt"
-	"github.com/jedib0t/go-pretty/table"
-	"github.com/jinzhu/gorm"
-	"github.com/spf13/viper"
 	"log"
 	"os"
 	"strings"
+
+	"github.com/bingoohuang/sqlmore"
+	"github.com/jedib0t/go-pretty/table"
+	"github.com/jinzhu/gorm"
+	"github.com/spf13/viper"
 )
 
 func (a *App) executeSqls() {
@@ -32,7 +32,7 @@ func (a *App) executeSqls() {
 		}
 
 		executed = true
-		result := gou.ExecuteSql(db.DB(), s, 100)
+		result := sqlmore.ExecSQL(db.DB(), s, 100, "NULL")
 		a.printResult(s, result)
 	}
 
@@ -41,14 +41,15 @@ func (a *App) executeSqls() {
 	}
 }
 
-func (a *App) printResult(s string, r gou.ExecuteSqlResult) {
+func (a *App) printResult(s string, r sqlmore.ExecResult) {
 	if r.Error != nil {
 		log.Println(r.Error)
 		return
 	}
 
-	log.Printf("cost: %s", durafmt.Format(r.CostTime))
-	if !r.IsQuerySql {
+	log.Printf("SQL: %s\n", s)
+	log.Printf("cost: %s\n", r.CostTime.String())
+	if !r.IsQuerySQL {
 		return
 	}
 

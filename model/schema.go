@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bingoohuang/pump/durafmt"
-
-	"github.com/bingoohuang/gou"
+	"github.com/bingoohuang/gou/rand"
 )
 
 type Table interface {
@@ -37,19 +35,19 @@ type PumpConfig struct {
 func (c PumpConfig) RandRows() int {
 	min := c.PumpMinRows
 	if min <= 0 {
-		min = gou.RandomInt()
+		min = rand.Int()
 	}
 
 	max := c.PumpMaxRows
 	if max <= 0 {
-		max = min + gou.RandomInt()
+		max = min + rand.Int()
 	}
 
 	if min >= max {
 		min = max
 	}
 
-	return gou.RandomIntN(uint64(max-min)) + min
+	return rand.IntN(uint64(max-min)) + min
 }
 
 type RowsPumped struct {
@@ -65,7 +63,7 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 
 	fmt.Printf("%s pumped %d(%.2f%%) rows cost %s/%s\n",
 		r.Table, r.Rows, 100.*float32(p.Rows)/float32(p.TotalRows),
-		durafmt.Format(r.Cost), durafmt.Format(p.Cost))
+		r.Cost.String(), p.Cost.String())
 }
 
 type DbSchema interface {

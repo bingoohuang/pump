@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/sqlmore"
+
 	"github.com/bingoohuang/faker"
 	"github.com/bingoohuang/pump/model"
 	"github.com/bingoohuang/pump/random"
@@ -56,11 +58,8 @@ var _ model.DbSchema = (*MySQLSchema)(nil)
 
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	dbFn := func() (*gorm.DB, error) {
-		db, err := gorm.Open("mysql", dataSourceName)
-		//if db != nil {
-		//	db.LogMode(true)
-		//}
-		return db, err
+		more := sqlmore.NewSQLMore("mysql", dataSourceName)
+		return more.GormOpen()
 	}
 	db, err := dbFn()
 	if err != nil {

@@ -7,7 +7,6 @@ import (
 
 	"github.com/bingoohuang/sqlmore"
 	"github.com/jedib0t/go-pretty/table"
-	"github.com/jinzhu/gorm"
 	"github.com/spf13/viper"
 )
 
@@ -18,10 +17,8 @@ func (a *App) executeSqls() {
 	}
 
 	ds := viper.GetString("datasource")
-	db, err := gorm.Open("mysql", ds)
-	if err != nil {
-		panic(err)
-	}
+	more := sqlmore.NewSQLMore("mysql", ds)
+	db := more.MustOpen()
 	defer db.Close()
 
 	executed := false
@@ -32,7 +29,7 @@ func (a *App) executeSqls() {
 		}
 
 		executed = true
-		result := sqlmore.ExecSQL(db.DB(), s, 100, "NULL")
+		result := sqlmore.ExecSQL(db, s, 100, "NULL")
 		a.printResult(s, result)
 	}
 

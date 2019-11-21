@@ -2,23 +2,31 @@ package dbi
 
 import (
 	"strings"
+	"time"
+
+	"github.com/spf13/viper"
 
 	"github.com/bingoohuang/pump/util"
 	"github.com/jinzhu/gorm"
 )
 
+// InsertBatcher ...
 type InsertBatcher struct {
 	batchNum    int
 	columnCount int
 
-	rowsCount   int
-	rows        []interface{}
-	db          *gorm.DB
-	batchSQL    string
-	completeSQL func() string
-	batchOp     func(int)
+	rowsCount     int
+	batchExecuted int
+	rows          []interface{}
+	db            *gorm.DB
+	batchSQL      string
+	completeSQL   func() string
+	batchOp       func(int)
+
+	sleep time.Duration
 }
 
+// NewInsertBatch ...
 func NewInsertBatch(table string, columnNames []string,
 	batchNum int, db *gorm.DB, batchOp func(int)) *InsertBatcher {
 	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
@@ -29,9 +37,12 @@ func NewInsertBatch(table string, columnNames []string,
 	b.batchSQL = sql + util.Repeat(bind, ",", batchNum)
 	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
+	b.sleep = time.Duration(viper.GetInt("sleep")) * time.Millisecond
+
 	return b
 }
 
+// AddRow ...
 func (b *InsertBatcher) AddRow(colValues []interface{}) {
 	b.rowsCount++
 	b.rows = append(b.rows, colValues...)
@@ -41,6 +52,7 @@ func (b *InsertBatcher) AddRow(colValues []interface{}) {
 	}
 }
 
+// Complete ...
 func (b *InsertBatcher) Complete() int {
 	left := b.rowsCount
 	if left > 0 {
@@ -51,7 +63,12 @@ func (b *InsertBatcher) Complete() int {
 }
 
 func (b *InsertBatcher) executeBatch(sql string) {
+	if b.batchExecuted > 0 && b.sleep > 0 {
+		time.Sleep(b.sleep)
+	}
+
 	b.db.Exec(sql, b.rows...)
+	b.batchExecuted++
 	b.batchOp(b.rowsCount)
 	b.rowsCount = 0
 	b.rows = b.rows[0:0]

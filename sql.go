@@ -16,12 +16,14 @@ func (a *App) executeSqls() {
 		return
 	}
 
-	ds := viper.GetString("datasource")
+	ds := viper.GetString("ds")
 	more := sqlmore.NewSQLMore("mysql", ds)
 	db := more.MustOpen()
+
 	defer db.Close()
 
 	executed := false
+
 	for _, s := range strings.Split(sqls, ";") {
 		s := strings.TrimSpace(s)
 		if s == "" {
@@ -46,6 +48,7 @@ func (a *App) printResult(s string, r sqlmore.ExecResult) {
 
 	log.Printf("SQL: %s\n", s)
 	log.Printf("cost: %s\n", r.CostTime.String())
+
 	if !r.IsQuerySQL {
 		return
 	}
@@ -56,14 +59,17 @@ func (a *App) printResult(s string, r sqlmore.ExecResult) {
 	cols := len(r.Headers) + 1
 	header := make(table.Row, cols)
 	header[0] = "#"
+
 	for i, h := range r.Headers {
 		header[i+1] = h
 	}
+
 	t.AppendHeader(header)
 
 	for i, r := range r.Rows {
 		row := make(table.Row, cols)
 		row[0] = i + 1
+
 		for j, c := range r {
 			row[j+1] = c
 		}

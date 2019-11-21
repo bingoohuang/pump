@@ -5,11 +5,13 @@ import (
 	"time"
 )
 
+// RuneRandom ...
 type RuneRandom struct {
 	stdChars []rune
 	numbers  []rune
 }
 
+// MakeRuneRandom ...
 func MakeRuneRandom() *RuneRandom {
 	return &RuneRandom{
 		stdChars: []rune("ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"),
@@ -17,6 +19,7 @@ func MakeRuneRandom() *RuneRandom {
 	}
 }
 
+// Rune ...
 func (rr *RuneRandom) Rune(size int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
@@ -35,9 +38,11 @@ func (rr *RuneRandom) Rune(size int) string {
 			randRune[i] = RandInt(r, 19968, 40869)
 		}
 	}
+
 	return string(randRune)
 }
 
+// RandInt ...
 func RandInt(r *rand.Rand, min, max int32) int32 {
 	return min + r.Int31n(max-min)
 }

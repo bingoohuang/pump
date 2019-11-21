@@ -8,9 +8,10 @@ import (
 	"github.com/bingoohuang/pump/model"
 )
 
-type DateTimeInRange struct {
-}
+// DateTimeInRange ...
+type DateTimeInRange struct{}
 
+// DateTimeInRangeZero ...
 func DateTimeInRangeZero() reflect.Type {
 	return reflect.TypeOf(time.Time{})
 }
@@ -20,6 +21,7 @@ func (r *DateTimeInRange) Value() interface{} {
 	rand.Seed(time.Now().UnixNano())
 	randomSeconds := rand.Int63n(model.OneYear)
 	d := time.Now().Add(-1 * time.Duration(randomSeconds) * time.Second)
+
 	return d
 }
 

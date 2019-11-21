@@ -19,6 +19,7 @@ func main() {
 	app.pumpingTables()
 }
 
+// App ...
 type App struct {
 	pumpTables   []string
 	pumpRoutines int
@@ -30,9 +31,11 @@ type App struct {
 	batchNum   int
 }
 
+// MakeApp ...
 func MakeApp() *App {
-	pumpDataSource := viper.GetString("datasource")
+	pumpDataSource := viper.GetString("ds")
 	schema, err := dbi.CreateMySQLSchema(pumpDataSource)
+
 	if err != nil {
 		panic(err)
 	}
@@ -68,6 +71,7 @@ func (a *App) pumpingTables() {
 		if pumped.Rows == a.totalRows {
 			delete(rows, r.Table)
 		}
+
 		if len(rows) == 0 {
 			break
 		}
@@ -78,6 +82,7 @@ func (a *App) pumpTable(table string) {
 	routineRows0, routineRows := a.routineRows()
 
 	go a.pump(table, routineRows0)
+
 	for i := 1; i < a.pumpRoutines; i++ {
 		go a.pump(table, routineRows)
 	}

@@ -8,11 +8,13 @@ import (
 	"github.com/bingoohuang/gou/rand"
 )
 
+// Table abstract a table information.
 type Table interface {
 	GetName() string
 	GetComment() string
 }
 
+// TableColumn ...
 type TableColumn interface {
 	GetName() string
 	GetComment() string
@@ -22,9 +24,11 @@ type TableColumn interface {
 	IsAllowNull() bool
 }
 
+// PumpColumnConfig  ...
 type PumpColumnConfig struct {
 }
 
+// PumpConfig ...
 type PumpConfig struct {
 	ColumnsConfig map[string]PumpColumnConfig
 	PumpMinRows   int
@@ -32,6 +36,7 @@ type PumpConfig struct {
 	BatchNum      int
 }
 
+// RandRows ...
 func (c PumpConfig) RandRows() int {
 	min := c.PumpMinRows
 	if min <= 0 {
@@ -50,6 +55,7 @@ func (c PumpConfig) RandRows() int {
 	return rand.IntN(uint64(max-min)) + min
 }
 
+// RowsPumped ...
 type RowsPumped struct {
 	Table     string
 	TotalRows int
@@ -57,6 +63,7 @@ type RowsPumped struct {
 	Cost      time.Duration
 }
 
+// Accumulate ...
 func (p *RowsPumped) Accumulate(r RowsPumped) {
 	p.Rows += r.Rows
 	p.Cost += r.Cost
@@ -66,6 +73,7 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 		r.Cost.String(), p.Cost.String())
 }
 
+// DbSchema ...
 type DbSchema interface {
 	Tables() ([]Table, error)
 	TableColumns(table string) ([]TableColumn, error)

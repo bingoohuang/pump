@@ -101,7 +101,7 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 
 	var tables []MySQLTable
 
-	db.Raw(`select * from information_schema.TABLES where TABLE_SCHEMA = database()`).Find(&tables)
+	db.Raw(`SELECT * FROM information_schema.TABLES WHERE TABLE_SCHEMA = database()`).Find(&tables)
 
 	ts := make([]model.Table, len(tables))
 

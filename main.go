@@ -33,9 +33,7 @@ type App struct {
 
 // MakeApp ...
 func MakeApp() *App {
-	pumpDataSource := viper.GetString("ds")
-	schema, err := dbi.CreateMySQLSchema(pumpDataSource)
-
+	schema, err := dbi.CreateMySQLSchema(viper.GetString("ds"))
 	if err != nil {
 		panic(err)
 	}

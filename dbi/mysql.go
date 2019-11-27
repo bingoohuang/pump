@@ -76,8 +76,7 @@ var _ model.DbSchema = (*MySQLSchema)(nil)
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	dbFn := func() (*gorm.DB, error) {
-		more := sqlmore.NewSQLMore("mysql", dataSourceName)
-		return more.GormOpen()
+		return sqlmore.NewSQLMore("mysql", dataSourceName).GormOpen()
 	}
 	db, err := dbFn()
 
@@ -138,7 +137,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 }
 
 // Pump ...
-func (m MySQLSchema) Pump(table string, rowsPumped chan model.RowsPumped, config model.PumpConfig) error {
+func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, config model.PumpConfig) error {
 	columns, err := m.TableColumns(table)
 	if err != nil {
 		return err

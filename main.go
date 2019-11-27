@@ -1,8 +1,7 @@
 package main
 
 import (
-	"strings"
-
+	"github.com/bingoohuang/gou/str"
 	"github.com/bingoohuang/pump/util"
 	"github.com/spf13/viper"
 
@@ -40,7 +39,7 @@ func MakeApp() *App {
 
 	totalRows := viper.GetInt("rows")
 	a := &App{
-		pumpTables:   strings.Split(viper.GetString("tables"), ","),
+		pumpTables:   str.SplitTrim(viper.GetString("tables"), ","),
 		pumpRoutines: viper.GetInt("goroutines"),
 		schema:       schema,
 		totalRows:    totalRows,
@@ -100,8 +99,8 @@ func (a *App) routineRows() (routineRows0, routineRows int) {
 }
 
 func (a *App) pump(pumpTable string, rows int) {
-	config := model.PumpConfig{PumpMinRows: rows, PumpMaxRows: rows, BatchNum: a.batchNum}
-	if err := a.schema.Pump(pumpTable, a.pumpedRows, config); err != nil {
+	c := model.PumpConfig{PumpMinRows: rows, PumpMaxRows: rows, BatchNum: a.batchNum}
+	if err := a.schema.Pump(pumpTable, a.pumpedRows, c); err != nil {
 		panic(err)
 	}
 }

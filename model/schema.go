@@ -77,5 +77,5 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 type DbSchema interface {
 	Tables() ([]Table, error)
 	TableColumns(table string) ([]TableColumn, error)
-	Pump(table string, rowsPumped chan RowsPumped, config PumpConfig) error
+	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig) error
 }

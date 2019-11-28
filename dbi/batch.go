@@ -10,6 +10,12 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// Batcher ...
+type Batcher interface {
+	AddRow(colValues []interface{})
+	Complete() int
+}
+
 // InsertBatcher ...
 type InsertBatcher struct {
 	batchNum    int
@@ -28,7 +34,7 @@ type InsertBatcher struct {
 
 // NewInsertBatch ...
 func NewInsertBatch(table string, columnNames []string,
-	batchNum int, db *gorm.DB, batchOp func(int)) *InsertBatcher {
+	batchNum int, db *gorm.DB, batchOp func(int)) Batcher {
 	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
 	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 

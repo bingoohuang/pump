@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"strings"
 
 	"github.com/bingoohuang/sqlmore"
 	"github.com/jedib0t/go-pretty/table"
@@ -11,15 +10,14 @@ import (
 )
 
 func (a *App) executeSqls() {
-	sqls := viper.GetString("sqls")
-	if sqls == "" {
+	subSqls := sqlmore.SplitSqls(viper.GetString("sqls"), ';')
+
+	if len(subSqls) == 0 {
 		return
 	}
 
 	ds := viper.GetString("ds")
-	more := sqlmore.NewSQLMore("mysql", ds)
-	db := more.MustOpen()
-	db.SetMaxOpenConns(1)
+	db := sqlmore.NewSQLMore("mysql", ds).MustOpen()
 
 	defer db.Close()
 
@@ -28,24 +26,13 @@ func (a *App) executeSqls() {
 		log.Fatalln(err)
 	}
 
-	defer tx.Commit() // nolint errcheck
-
-	executed := false
-
-	for _, s := range strings.Split(sqls, ";") {
-		s := strings.TrimSpace(s)
-		if s == "" {
-			continue
-		}
-
-		executed = true
-		result := sqlmore.ExecSQL(tx, s, 100, "NULL")
-		a.printResult(s, result)
+	for _, s := range subSqls {
+		r := sqlmore.ExecSQL(tx, s, 100, "NULL")
+		a.printResult(s, r)
 	}
 
-	if executed { // executed sql and then exits!
-		os.Exit(0)
-	}
+	tx.Commit() // nolint errcheck
+	os.Exit(0)
 }
 
 func (a *App) printResult(s string, r sqlmore.ExecResult) {

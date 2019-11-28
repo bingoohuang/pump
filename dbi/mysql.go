@@ -168,11 +168,12 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 		rowsPumped <- model.RowsPumped{Table: table, Rows: rows, Cost: time.Since(t)}
 		t = time.Now()
 	})
-	colValues := make([]interface{}, len(columns))
 
 	rows := config.RandRows()
 
 	for i := 1; i <= rows; i++ {
+		colValues := make([]interface{}, len(columns))
+
 		for j, col := range columns {
 			colValues[j] = columnsValueRand[col.GetName()].Value()
 		}

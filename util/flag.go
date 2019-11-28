@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bingoohuang/gou/http"
+	"github.com/bingoohuang/gou/htt"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
 )
@@ -23,7 +23,7 @@ func InitFlags() {
 	pflag.IntP("sleep", "", 0, "sleep milli-seconds after a batch")
 	pflag.IntP("goroutines", "g", 1, "go routines to pump for each table")
 
-	pprofAddr := http.PprofAddrPflag()
+	pprofAddr := htt.PprofAddrPflag()
 
 	pflag.Parse()
 
@@ -40,7 +40,7 @@ func InitFlags() {
 		os.Exit(0)
 	}
 
-	http.StartPprof(*pprofAddr)
+	htt.StartPprof(*pprofAddr)
 
 	viper.SetEnvPrefix("PUMP")
 	viper.AutomaticEnv()

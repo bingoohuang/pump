@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/bingoohuang/gou/rand"
+	"github.com/bingoohuang/gou/ran"
 )
 
 // Table abstract a table information.
@@ -40,19 +40,19 @@ type PumpConfig struct {
 func (c PumpConfig) RandRows() int {
 	min := c.PumpMinRows
 	if min <= 0 {
-		min = rand.Int()
+		min = ran.Int()
 	}
 
 	max := c.PumpMaxRows
 	if max <= 0 {
-		max = min + rand.Int()
+		max = min + ran.Int()
 	}
 
 	if min >= max {
 		min = max
 	}
 
-	return rand.IntN(uint64(max-min)) + min
+	return ran.IntN(uint64(max-min)) + min
 }
 
 // RowsPumped ...

@@ -19,8 +19,16 @@ func (a *App) executeSqls() {
 	ds := viper.GetString("ds")
 	more := sqlmore.NewSQLMore("mysql", ds)
 	db := more.MustOpen()
+	db.SetMaxOpenConns(1)
 
 	defer db.Close()
+
+	tx, err := db.Begin()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	defer tx.Commit() // nolint errcheck
 
 	executed := false
 
@@ -31,7 +39,7 @@ func (a *App) executeSqls() {
 		}
 
 		executed = true
-		result := sqlmore.ExecSQL(db, s, 100, "NULL")
+		result := sqlmore.ExecSQL(tx, s, 100, "NULL")
 		a.printResult(s, result)
 	}
 

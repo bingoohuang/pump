@@ -1,6 +1,7 @@
 package dbi
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -43,7 +44,16 @@ func NewInsertBatch(table string, columnNames []string,
 	b.batchSQL = sql + util.Repeat(bind, ",", batchNum)
 	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
-	b.sleep = time.Duration(viper.GetInt("sleep")) * time.Millisecond
+
+	sleepDuration := viper.GetString("sleep")
+	if sleepDuration != "" {
+		var err error
+		b.sleep, err = time.ParseDuration(sleepDuration)
+
+		if err != nil {
+			log.Panicf("fail to parse sleep %s, error %v", sleepDuration, err)
+		}
+	}
 
 	return b
 }

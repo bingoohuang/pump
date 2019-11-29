@@ -14,13 +14,13 @@ import (
 // InitFlags ...
 func InitFlags() {
 	help := pflag.BoolP("help", "h", false, "help")
-	pflag.StringP("sqls", "", "", "execute sqls, separated by ;")
-	pflag.StringP("fmt", "", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
-	pflag.StringP("ds", "", "", "eg. user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local")
+	pflag.StringP("sqls", "s", "", "execute sqls, separated by ;")
+	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
+	pflag.StringP("ds", "d", "", "eg. user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local")
 	pflag.StringP("tables", "t", "", "pump tables, separated by ,")
-	pflag.IntP("rows", "", 1000, "pump rows")
+	pflag.IntP("rows", "r", 1000, "pump rows")
 	pflag.IntP("batch", "b", 1000, "batch rows")
-	pflag.IntP("sleep", "", 0, "sleep milli-seconds after a batch")
+	pflag.StringP("sleep", "", "", "sleep after each batch, eg. 10s (ns/us/µs/ms/s/m/h)")
 	pflag.IntP("goroutines", "g", 1, "go routines to pump for each table")
 
 	pprofAddr := htt.PprofAddrPflag()

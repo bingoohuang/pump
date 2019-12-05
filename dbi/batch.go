@@ -45,17 +45,23 @@ func NewInsertBatch(table string, columnNames []string,
 	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
 
-	sleepDuration := viper.GetString("sleep")
-	if sleepDuration != "" {
-		var err error
-		b.sleep, err = time.ParseDuration(sleepDuration)
-
-		if err != nil {
-			log.Panicf("fail to parse sleep %s, error %v", sleepDuration, err)
-		}
-	}
+	b.setSleepDuration()
 
 	return b
+}
+
+func (b *InsertBatcher) setSleepDuration() {
+	sleepDuration := viper.GetString("sleep")
+	if sleepDuration == "" {
+		return
+	}
+
+	var err error
+	b.sleep, err = time.ParseDuration(sleepDuration)
+
+	if err != nil {
+		log.Panicf("fail to parse sleep %s, error %v", sleepDuration, err)
+	}
 }
 
 // AddRow ...

@@ -22,6 +22,7 @@ type TableColumn interface {
 	GetDataType() string
 	GetMaxSize() sql.NullInt64
 	IsAllowNull() bool
+	GetColumnRandomizer() ColumnRandomizer
 }
 
 // PumpColumnConfig  ...

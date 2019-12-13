@@ -1,4 +1,4 @@
-package random
+package model
 
 // ColumnRandomizer ...
 type ColumnRandomizer interface {

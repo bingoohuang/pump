@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/gou/str"
+
 	"github.com/bingoohuang/sqlmore"
 
 	"github.com/bingoohuang/faker"
@@ -35,6 +37,7 @@ func (m MySQLTable) GetComment() string { return m.Comment }
 type MyTableColumn struct {
 	Name      string         `gorm:"column:COLUMN_NAME"`
 	Type      string         `gorm:"column:COLUMN_TYPE"`
+	Extra     string         `gorm:"column:EXTRA"` // auto_increment
 	Comment   string         `gorm:"column:COLUMN_COMMENT"`
 	DataType  string         `gorm:"column:DATA_TYPE"`
 	MaxLength sql.NullInt64  `gorm:"column:CHARACTER_MAXIMUM_LENGTH"`
@@ -43,6 +46,8 @@ type MyTableColumn struct {
 
 	NumericPrecision sql.NullInt64 `gorm:"column:NUMERIC_PRECISION"`
 	NumericScale     sql.NullInt64 `gorm:"column:NUMERIC_SCALE"`
+
+	randomizer model.ColumnRandomizer
 }
 
 var _ model.TableColumn = (*MyTableColumn)(nil)
@@ -64,6 +69,9 @@ func (c MyTableColumn) GetName() string { return c.Name }
 
 // GetComment ...
 func (c MyTableColumn) GetComment() string { return c.Comment }
+
+// GetColumnRandomizer ...
+func (c MyTableColumn) GetColumnRandomizer() model.ColumnRandomizer { return c.randomizer }
 
 // MySQLSchema ...
 type MySQLSchema struct {
@@ -122,18 +130,36 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	defer util.Closeq(db)
 
 	columns := make([]MyTableColumn, 0)
-	s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
-		`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
-	db.Raw(s, table).Find(&columns)
+	schema, tableName := ParseTable(table)
+
+	if schema != "" {
+		s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? ` +
+			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
+		db.Raw(s, schema, tableName).Find(&columns)
+	} else {
+		s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
+			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
+		db.Raw(s, tableName).Find(&columns)
+	}
 
 	ts := make([]model.TableColumn, len(columns))
 
 	for i, t := range columns {
 		t.Comment = strings.TrimSpace(t.Comment)
+		t.randomizer = m.makeColumnRandomizer(t)
 		ts[i] = t
 	}
 
 	return ts, db.Error
+}
+
+// ParseTable parses the schema and table name from table which may be like db1.t1
+func ParseTable(table string) (schemaName, tableName string) {
+	if strings.Contains(table, ".") {
+		return str.Split2(table, ".", true, true)
+	}
+
+	return "", table
 }
 
 // Pump ...
@@ -143,17 +169,8 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 		return err
 	}
 
-	columnsValueRand := make(map[string]random.ColumnRandomizer)
-
-	for _, col := range columns {
-		columnsValueRand[col.GetName()] = m.makeColumnRandomizer(col.(MyTableColumn))
-	}
-
-	columnNames := make([]string, len(columns))
-
-	for i, c := range columns {
-		columnNames[i] = c.GetName()
-	}
+	randMap := makeRandomizerMap(columns)
+	columnNames := makeInsertColumns(randMap, columns)
 
 	db, err := m.dbFn()
 	if err != nil {
@@ -172,10 +189,10 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 	rows := config.RandRows()
 
 	for i := 1; i <= rows; i++ {
-		colValues := make([]interface{}, len(columns))
+		colValues := make([]interface{}, len(columnNames))
 
-		for j, col := range columns {
-			colValues[j] = columnsValueRand[col.GetName()].Value()
+		for j, col := range columnNames {
+			colValues[j] = randMap[col].Value()
 		}
 
 		batch.AddRow(colValues)
@@ -186,22 +203,92 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 	return nil
 }
 
-func (m MySQLSchema) makeColumnRandomizer(column MyTableColumn) random.ColumnRandomizer {
-	sub := m.pumpOptionReg.FindStringSubmatch(column.GetComment())
+func makeInsertColumns(randMap map[string]model.ColumnRandomizer, columns []model.TableColumn) []string {
+	columnNames := make([]string, len(randMap))
+
+	i := 0
+
+	for _, c := range columns {
+		if _, ok := randMap[c.GetName()]; ok {
+			columnNames[i] = c.GetName()
+			i++
+		}
+	}
+
+	return columnNames
+}
+
+func makeRandomizerMap(columns []model.TableColumn) map[string]model.ColumnRandomizer {
+	randMap := make(map[string]model.ColumnRandomizer)
+
+	for _, col := range columns {
+		r := col.GetColumnRandomizer()
+		if r != nil {
+			randMap[col.GetName()] = r
+		}
+	}
+
+	return randMap
+}
+
+func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.ColumnRandomizer {
+	sub := m.pumpOptionReg.FindStringSubmatch(c.GetComment())
 	pumpOption := ""
 
 	if len(sub) == 2 {
 		pumpOption = sub[1]
 	}
 
-	if pumpOption != "" {
-		return random.NewFn(func() interface{} {
-			val, _ := faker.FakeColumnWithType(column.zeroType(), pumpOption)
-			return val
-		})
+	if pumpOption == "-" { // ignore
+		return nil
 	}
 
-	return column.randomColumn()
+	// nolint
+	// mysql> show create table a.ta \G
+	// *************************** 1. row ***************************
+	// 	Table: ta
+	// Create Table: CREATE TABLE `ta` (
+	// 	`id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id',
+	// 	`name` varchar(10) DEFAULT NULL,
+	// 	`age` int(11) DEFAULT NULL,
+	// 	PRIMARY KEY (`id`)
+	// ) ENGINE=InnoDB AUTO_INCREMENT=2079863083 DEFAULT CHARSET=utf8
+	// 1 row in set (0.00 sec)
+	// mysql> show full columns from a.ta;
+	// +-------+-------------+-----------------+------+-----+---------+----------------+---------------------------------+---------+
+	// | Field | Type        | Collation       | Null | Key | Default | Extra          | Privileges                      | Comment |
+	// 	+-------+-------------+-----------------+------+-----+---------+----------------+---------------------------------+---------+
+	// | id    | int(11)     | NULL            | NO   | PRI | NULL    | auto_increment | select,insert,update,references | id      |
+	// | name  | varchar(10) | utf8_general_ci | YES  |     | NULL    |                | select,insert,update,references |         |
+	// | age   | int(11)     | NULL            | YES  |     | NULL    |                | select,insert,update,references |         |
+	// +-------+-------------+-----------------+------+-----+---------+----------------+---------------------------------+---------+
+	// mysql> ALTER TABLE a.ta  MODIFY column id int auto_increment comment 'pump:"--"';
+	// mysql> ALTER TABLE a.ta  MODIFY column id int auto_increment comment 'pump:"-"';
+	// mysql> ALTER TABLE a.ta  MODIFY column id int auto_increment comment 'id';
+	if c.IsAutoIncrement() {
+		if pumpOption == "" { // ignore auto_increment by default
+			return nil
+		}
+
+		if pumpOption == "--" { // not ignore
+			return c.randomColumn()
+		}
+	}
+
+	if pumpOption == "" {
+		return c.randomColumn()
+	}
+
+	return random.NewFn(func() interface{} {
+		val, _ := faker.FakeColumnWithType(c.zeroType(), pumpOption)
+		return val
+	})
+}
+
+// IsAutoIncrement tells if the col is auto_increment or not.
+// eg. create table a.ta(id int auto_increment, name varchar(10), age int, primary key(id));
+func (c MyTableColumn) IsAutoIncrement() bool {
+	return strings.Contains(c.Extra, "auto_increment")
 }
 
 func (c MyTableColumn) zeroType() reflect.Type {
@@ -228,7 +315,7 @@ func (c MyTableColumn) zeroType() reflect.Type {
 	return reflect.TypeOf(nil)
 }
 
-func (c MyTableColumn) randomColumn() random.ColumnRandomizer {
+func (c MyTableColumn) randomColumn() model.ColumnRandomizer {
 	typ := c.GetDataType()
 	switch typ {
 	case "tinyint", "smallint", "mediumint", "int", "integer", "bigint":

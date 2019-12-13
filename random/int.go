@@ -13,7 +13,7 @@ type Int struct {
 	allowNull bool
 }
 
-var _ ColumnRandomizer = (*Int)(nil)
+var _ model.ColumnRandomizer = (*Int)(nil)
 
 // IntZero ...
 func IntZero() reflect.Type {

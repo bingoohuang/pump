@@ -2,8 +2,9 @@ package model
 
 import (
 	"database/sql"
-	"fmt"
 	"time"
+
+	"github.com/sirupsen/logrus"
 
 	"github.com/bingoohuang/gou/ran"
 )
@@ -69,7 +70,7 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 	p.Rows += r.Rows
 	p.Cost += r.Cost
 
-	fmt.Printf("%s pumped %d(%.2f%%) rows cost %s/%s\n",
+	logrus.Infof("pumped %s %d(%.2f%%) rows cost %s/%s",
 		r.Table, r.Rows, 100.*float32(p.Rows)/float32(p.TotalRows),
 		r.Cost.String(), p.Cost.String())
 }

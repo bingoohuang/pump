@@ -8,6 +8,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
+	"github.com/bingoohuang/pump/ds"
+
 	"github.com/bingoohuang/gou/str"
 
 	"github.com/bingoohuang/sqlmore"
@@ -83,9 +87,10 @@ var _ model.DbSchema = (*MySQLSchema)(nil)
 
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
-	dbFn := func() (*gorm.DB, error) {
-		return sqlmore.NewSQLMore("mysql", dataSourceName).GormOpen()
-	}
+	compatibleDs := ds.CompatibleMySQLDs(dataSourceName)
+	logrus.Infof("dataSourceName:%s", compatibleDs)
+
+	dbFn := func() (*gorm.DB, error) { return sqlmore.NewSQLMore("mysql", compatibleDs).GormOpen() }
 	db, err := dbFn()
 
 	if err != nil {

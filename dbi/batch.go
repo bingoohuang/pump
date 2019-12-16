@@ -5,6 +5,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/spf13/viper"
 
 	"github.com/bingoohuang/pump/util"
@@ -42,6 +44,7 @@ func NewInsertBatch(table string, columnNames []string,
 	bind := "(" + util.Repeat("?", ",", b.columnCount) + ")"
 	sql := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
 	b.batchSQL = sql + util.Repeat(bind, ",", batchNum)
+	logrus.Infof("batchSQL:%s", b.batchSQL)
 	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
 
@@ -78,7 +81,10 @@ func (b *InsertBatcher) AddRow(colValues []interface{}) {
 func (b *InsertBatcher) Complete() int {
 	left := b.rowsCount
 	if left > 0 {
-		b.executeBatch(b.completeSQL())
+		completeSQL := b.completeSQL()
+		logrus.Infof("completeSQL:%s", completeSQL)
+
+		b.executeBatch(completeSQL)
 	}
 
 	return left
@@ -88,6 +94,8 @@ func (b *InsertBatcher) executeBatch(sql string) {
 	if b.batchExecuted > 0 && b.sleep > 0 {
 		time.Sleep(b.sleep)
 	}
+
+	logrus.Infof("values:%v", b.rows)
 
 	b.db.Exec(sql, b.rows...)
 	b.batchExecuted++

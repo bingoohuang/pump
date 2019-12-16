@@ -16,7 +16,17 @@ func InitFlags() {
 	help := pflag.BoolP("help", "h", false, "help")
 	pflag.StringP("sqls", "s", "", "execute sqls, separated by ;")
 	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
-	pflag.StringP("ds", "d", "", "eg. user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local")
+
+	pflag.StringP("ds", "d", "", `eg. 
+	MYSQL_PWD=8BE4 mysql -h 127.0.0.1 -P 9633 -u root
+	mysql -h 127.0.0.1 -P 9633 -u root -p8BE4
+	mysql -h 127.0.0.1 -P 9633 -u root -p8BE4 -Dtest
+	mysql -h127.0.0.1 -u root -p8BE4 -Dtest
+	127.0.0.1:9633 root/8BE4
+	127.0.0.1 root/8BE4
+	127.0.0.1:9633 root/8BE4 db=test
+	root:8BE4@tcp(127.0.0.1:9633)/?charset=utf8mb4&parseTime=true&loc=Local
+`)
 	pflag.StringP("tables", "t", "", "pump tables, separated by ,")
 	pflag.IntP("rows", "r", 1000, "pump total rows")
 	pflag.IntP("batch", "b", 1000, "batch rows")

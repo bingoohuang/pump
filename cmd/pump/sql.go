@@ -26,7 +26,7 @@ func (a *App) executeSqls() {
 	}
 
 	for _, s := range subSqls {
-		r := sqlmore.ExecSQL(tx, s, 100, "NULL")
+		r := sqlmore.ExecSQL(tx, s, 3000, "NULL")
 		a.printResult(s, r)
 	}
 

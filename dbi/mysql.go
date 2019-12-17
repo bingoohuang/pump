@@ -148,6 +148,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	} else {
 		const s = `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
 			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
+
 		db.Raw(s, tableName).Find(&columns)
 	}
 

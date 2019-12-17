@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/bingoohuang/gou/str"
+	"github.com/mattn/go-shellwords"
 	"github.com/spf13/pflag"
 )
 
@@ -90,7 +93,15 @@ func compatibleMySQLClientCmd(s string) string {
 	pf.StringP("user", "u", "", "User for login if not current user")
 	pf.StringP("password", "p", "", "Password to use when connecting to serve")
 
-	if err := pf.Parse(strings.Fields(s)); err != nil {
+	p := shellwords.NewParser()
+	p.ParseEnv = true
+	args, err := p.Parse(s)
+
+	if err != nil {
+		logrus.Fatalf("Fail to parse ds %s error %v", s, err)
+	}
+
+	if err := pf.Parse(args); err != nil {
 		return s
 	}
 

@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
-	github.com/bingoohuang/gou v0.0.0-20191212070132-501baed7c024
+	github.com/bingoohuang/gou v0.0.0-20191216150455-0937261aa98a
 	github.com/bingoohuang/sqlmore v0.0.0-20191128031816-516eca22d8de
 	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
@@ -16,6 +16,7 @@ require (
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
+	github.com/mattn/go-shellwords v1.0.6
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.4.2
 	github.com/spf13/afero v1.2.2 // indirect

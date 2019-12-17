@@ -10,6 +10,9 @@ func TestCompatibleDs(t *testing.T) {
 	ds := CompatibleMySQLDs("MYSQL_PWD=8BE4 mysql -h 127.0.0.1 -P 9633 -u root")
 	assert.Equal(t, `root:8BE4@tcp(127.0.0.1:9633)/?charset=utf8mb4&parseTime=true&loc=Local`, ds)
 
+	ds = CompatibleMySQLDs(`MYSQL_PWD="! 8BE4" mysql --host="127.0.0.1" -P 9633 -u 'root'`)
+	assert.Equal(t, `root:! 8BE4@tcp(127.0.0.1:9633)/?charset=utf8mb4&parseTime=true&loc=Local`, ds)
+
 	ds = CompatibleMySQLDs("mysql -h 127.0.0.1 -P 9633 -u root -p8BE4")
 	assert.Equal(t, `root:8BE4@tcp(127.0.0.1:9633)/?charset=utf8mb4&parseTime=true&loc=Local`, ds)
 

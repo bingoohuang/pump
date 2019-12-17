@@ -12,6 +12,7 @@ import (
 
 	"github.com/bingoohuang/pump/ds"
 
+	gouio "github.com/bingoohuang/gou/io"
 	"github.com/bingoohuang/gou/str"
 
 	"github.com/bingoohuang/sqlmore"
@@ -19,7 +20,6 @@ import (
 	"github.com/bingoohuang/faker"
 	"github.com/bingoohuang/pump/model"
 	"github.com/bingoohuang/pump/random"
-	"github.com/bingoohuang/pump/util"
 	"github.com/jinzhu/gorm"
 )
 
@@ -110,11 +110,13 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 		return nil, err
 	}
 
-	defer util.Closeq(db)
+	defer gouio.Close(db)
 
 	var tables []MySQLTable
 
-	db.Raw(`SELECT * FROM information_schema.TABLES WHERE TABLE_SCHEMA = database()`).Find(&tables)
+	const s = `SELECT * FROM information_schema.TABLES WHERE TABLE_SCHEMA = database()`
+
+	db.Raw(s).Find(&tables)
 
 	ts := make([]model.Table, len(tables))
 
@@ -133,17 +135,18 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 		return nil, err
 	}
 
-	defer util.Closeq(db)
+	defer gouio.Close(db)
 
 	columns := make([]MyTableColumn, 0)
 	schema, tableName := ParseTable(table)
 
 	if schema != "" {
-		s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? ` +
+		const s = `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? ` +
 			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
+
 		db.Raw(s, schema, tableName).Find(&columns)
 	} else {
-		s := `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
+		const s = `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
 			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
 		db.Raw(s, tableName).Find(&columns)
 	}
@@ -183,7 +186,7 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 		return err
 	}
 
-	defer util.Closeq(db)
+	defer gouio.Close(db)
 
 	t := time.Now()
 
@@ -228,8 +231,7 @@ func makeRandomizerMap(columns []model.TableColumn) map[string]model.ColumnRando
 	randMap := make(map[string]model.ColumnRandomizer)
 
 	for _, col := range columns {
-		r := col.GetColumnRandomizer()
-		if r != nil {
+		if r := col.GetColumnRandomizer(); r != nil {
 			randMap[col.GetName()] = r
 		}
 	}

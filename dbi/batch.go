@@ -5,11 +5,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/gou/str"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/spf13/viper"
 
-	"github.com/bingoohuang/pump/util"
 	"github.com/jinzhu/gorm"
 )
 
@@ -41,11 +42,11 @@ func NewInsertBatch(table string, columnNames []string,
 	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
 	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 
-	bind := "(" + util.Repeat("?", ",", b.columnCount) + ")"
+	bind := "(" + str.Repeat("?", ",", b.columnCount) + ")"
 	sql := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
-	b.batchSQL = sql + util.Repeat(bind, ",", batchNum)
+	b.batchSQL = sql + str.Repeat(bind, ",", batchNum)
 	logrus.Infof("batchSQL:%s", b.batchSQL)
-	b.completeSQL = func() string { return sql + util.Repeat(bind, ",", b.rowsCount) }
+	b.completeSQL = func() string { return sql + str.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
 
 	b.setSleepDuration()

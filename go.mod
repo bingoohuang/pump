@@ -5,7 +5,7 @@ go 1.12
 require (
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
-	github.com/bingoohuang/gou v0.0.0-20191216150455-0937261aa98a
+	github.com/bingoohuang/gou v0.0.0-20191217063606-185f58ddca79
 	github.com/bingoohuang/sqlmore v0.0.0-20191128031816-516eca22d8de
 	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect

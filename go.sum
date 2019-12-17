@@ -31,6 +31,8 @@ github.com/bingoohuang/goreflect v0.0.0-20190712052741-f9e6d0b5f7fd h1:horohKpjO
 github.com/bingoohuang/goreflect v0.0.0-20190712052741-f9e6d0b5f7fd/go.mod h1:rga5AtVf7Npiv04XZxTsd8LC4/VyEHr+sn4Vt1jWPNE=
 github.com/bingoohuang/gou v0.0.0-20191216150455-0937261aa98a h1:K5YeqqLEmar5laGa0Iqsccf8ir6h4HTLYuE2HvkTmdk=
 github.com/bingoohuang/gou v0.0.0-20191216150455-0937261aa98a/go.mod h1:jyyu/57Psqg6/btyBwAT6E9dTgs5lfoHdqcQwD96uVU=
+github.com/bingoohuang/gou v0.0.0-20191217063606-185f58ddca79 h1:GvhMjn9lENyPolWvu7/1JB+HgnKmN3HoLE5qU2sJ4Y8=
+github.com/bingoohuang/gou v0.0.0-20191217063606-185f58ddca79/go.mod h1:jyyu/57Psqg6/btyBwAT6E9dTgs5lfoHdqcQwD96uVU=
 github.com/bingoohuang/now v0.0.0-20190715150822-ba8e4a91e3d9/go.mod h1:SZou0n15kP/Z3Vq8lyuH59ML96lepeGzInZw0+KCFw4=
 github.com/bingoohuang/sqlmore v0.0.0-20191128031816-516eca22d8de h1:GxN1m1bPZTkN2tcsWMcIC/s4Vxafz1cAwshOang8hz0=
 github.com/bingoohuang/sqlmore v0.0.0-20191128031816-516eca22d8de/go.mod h1:j+n7Coi7c4g8LuHAD5rrYl8VSvGRyEFsMwIEPWEHd1k=

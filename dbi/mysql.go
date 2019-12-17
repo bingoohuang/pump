@@ -81,6 +81,7 @@ func (c MyTableColumn) GetColumnRandomizer() model.ColumnRandomizer { return c.r
 type MySQLSchema struct {
 	dbFn          func() (*gorm.DB, error)
 	pumpOptionReg *regexp.Regexp
+	compatibleDs  string
 }
 
 var _ model.DbSchema = (*MySQLSchema)(nil)
@@ -91,16 +92,16 @@ func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	logrus.Infof("dataSourceName:%s", compatibleDs)
 
 	dbFn := func() (*gorm.DB, error) { return sqlmore.NewSQLMore("mysql", compatibleDs).GormOpen() }
-	db, err := dbFn()
 
-	if err != nil {
-		return nil, err
-	}
-
-	defer util.Closeq(db)
-
-	return &MySQLSchema{dbFn: dbFn, pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`)}, err
+	return &MySQLSchema{
+		dbFn:          dbFn,
+		pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`),
+		compatibleDs:  compatibleDs,
+	}, nil
 }
+
+// CompatibleDs returns the dataSourceName from various the compatible format.
+func (m MySQLSchema) CompatibleDs() string { return m.compatibleDs }
 
 // Tables ...
 func (m MySQLSchema) Tables() ([]model.Table, error) {

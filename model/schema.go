@@ -79,5 +79,7 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 type DbSchema interface {
 	Tables() ([]Table, error)
 	TableColumns(table string) ([]TableColumn, error)
+	// CompatibleDs returns the dataSourceName from various the compatible format.
+	CompatibleDs() string
 	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig) error
 }

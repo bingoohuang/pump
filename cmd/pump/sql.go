@@ -16,8 +16,7 @@ func (a *App) executeSqls() {
 		return
 	}
 
-	ds := viper.GetString("ds")
-	db := sqlmore.NewSQLMore("mysql", ds).MustOpen()
+	db := sqlmore.NewSQLMore("mysql", a.schema.CompatibleDs()).MustOpen()
 
 	defer db.Close()
 

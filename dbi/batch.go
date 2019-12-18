@@ -1,9 +1,12 @@
 package dbi
 
 import (
+	"fmt"
 	"log"
 	"strings"
 	"time"
+
+	"github.com/Masterminds/goutils"
 
 	"github.com/bingoohuang/gou/str"
 
@@ -34,11 +37,13 @@ type InsertBatcher struct {
 	batchOp       func(int)
 
 	sleep time.Duration
+
+	verbose bool
 }
 
 // NewInsertBatch ...
 func NewInsertBatch(table string, columnNames []string,
-	batchNum int, db *gorm.DB, batchOp func(int)) Batcher {
+	batchNum int, db *gorm.DB, batchOp func(int), verbose bool) Batcher {
 	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
 	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 
@@ -48,6 +53,7 @@ func NewInsertBatch(table string, columnNames []string,
 	logrus.Infof("batchSQL:%s", b.batchSQL)
 	b.completeSQL = func() string { return sql + str.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
+	b.verbose = verbose
 
 	b.setSleepDuration()
 
@@ -83,7 +89,6 @@ func (b *InsertBatcher) Complete() int {
 	left := b.rowsCount
 	if left > 0 {
 		completeSQL := b.completeSQL()
-		logrus.Infof("completeSQL:%s", completeSQL)
 
 		b.executeBatch(completeSQL)
 	}
@@ -96,7 +101,11 @@ func (b *InsertBatcher) executeBatch(sql string) {
 		time.Sleep(b.sleep)
 	}
 
-	logrus.Infof("values:%v", b.rows)
+	if b.verbose {
+		s := fmt.Sprintf("values:%v", b.rows)
+		abbr, _ := goutils.Abbreviate(s, 500)
+		logrus.Info(abbr)
+	}
 
 	b.db.Exec(sql, b.rows...)
 	b.batchExecuted++

@@ -3,6 +3,7 @@ module github.com/bingoohuang/pump
 go 1.12
 
 require (
+	github.com/Masterminds/goutils v1.1.0
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
 	github.com/bingoohuang/gou v0.0.0-20191217063606-185f58ddca79
@@ -10,6 +11,8 @@ require (
 	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
+	github.com/gosuri/uilive v0.0.3 // indirect
+	github.com/gosuri/uiprogress v0.0.1
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
 	github.com/jinzhu/gorm v1.9.11
 	github.com/json-iterator/go v1.1.8 // indirect

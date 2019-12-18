@@ -2,11 +2,11 @@ package model
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
-	"github.com/sirupsen/logrus"
-
 	"github.com/bingoohuang/gou/ran"
+	"github.com/gosuri/uiprogress"
 )
 
 // Table abstract a table information.
@@ -63,6 +63,22 @@ type RowsPumped struct {
 	TotalRows int
 	Rows      int
 	Cost      time.Duration
+
+	bar *uiprogress.Bar
+}
+
+// MakeRowsPumped makes a new RowsPumped
+func MakeRowsPumped(pumpTable string, totalRows int) *RowsPumped {
+	bar := uiprogress.AddBar(totalRows).AppendElapsed().
+		AppendCompleted().PrependFunc(func(b *uiprogress.Bar) string {
+		return fmt.Sprintf("%s %d/%d", pumpTable, b.Current(), totalRows)
+	})
+
+	return &RowsPumped{
+		Table:     pumpTable,
+		TotalRows: totalRows,
+		bar:       bar,
+	}
 }
 
 // Accumulate ...
@@ -70,9 +86,7 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 	p.Rows += r.Rows
 	p.Cost += r.Cost
 
-	logrus.Infof("pumped %s %d(%.2f%%) rows cost %s/%s",
-		r.Table, r.Rows, 100.*float32(p.Rows)/float32(p.TotalRows),
-		r.Cost.String(), p.Cost.String())
+	_ = p.bar.Set(p.Rows)
 }
 
 // DbSchema ...
@@ -81,5 +95,5 @@ type DbSchema interface {
 	TableColumns(table string) ([]TableColumn, error)
 	// CompatibleDs returns the dataSourceName from various the compatible format.
 	CompatibleDs() string
-	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig) error
+	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig, ready chan bool) error
 }

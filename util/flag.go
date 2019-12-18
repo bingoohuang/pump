@@ -32,6 +32,7 @@ func InitFlags() {
 	pflag.IntP("batch", "b", 1000, "batch rows")
 	pflag.StringP("sleep", "", "", "sleep after each batch, eg. 10s (ns/us/µs/ms/s/m/h)")
 	pflag.IntP("goroutines", "g", 1, "go routines to pump for each table")
+	pflag.BoolP("verbose", "V", false, "verbose details")
 
 	pprofAddr := htt.PprofAddrPflag()
 

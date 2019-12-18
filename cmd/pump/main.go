@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/bingoohuang/gou/str"
 	"github.com/bingoohuang/pump/util"
+	"github.com/gosuri/uiprogress"
 	"github.com/spf13/viper"
 
 	"github.com/bingoohuang/pump/dbi"
@@ -47,6 +48,8 @@ func MakeApp() *App {
 	}
 	a.pumpedRows = make(chan model.RowsPumped, len(a.pumpTables)*a.pumpRoutines)
 
+	schema.SetVerbose(viper.GetBool("verbose"))
+
 	return a
 }
 
@@ -54,12 +57,22 @@ func (a *App) pumpingTables() {
 	rows := make(map[string]*model.RowsPumped)
 	complete := make(map[string]bool)
 
+	ready := make(chan bool)
+
 	for _, pumpTable := range a.pumpTables {
-		rows[pumpTable] = &model.RowsPumped{Table: pumpTable, TotalRows: a.totalRows}
+		rows[pumpTable] = model.MakeRowsPumped(pumpTable, a.totalRows)
 		complete[pumpTable] = false
 
-		a.pumpTable(pumpTable)
+		a.pumpTable(pumpTable, ready)
 	}
+
+	for range a.pumpTables {
+		for i := 0; i < a.pumpRoutines; i++ {
+			<-ready
+		}
+	}
+
+	uiprogress.Start()
 
 	for r := range a.pumpedRows {
 		pumped := rows[r.Table]
@@ -73,15 +86,17 @@ func (a *App) pumpingTables() {
 			break
 		}
 	}
+
+	uiprogress.Stop()
 }
 
-func (a *App) pumpTable(table string) {
+func (a *App) pumpTable(table string, ready chan bool) {
 	routineRows0, routineRows := a.routineRows()
 
-	go a.pump(table, routineRows0)
+	go a.pump(table, routineRows0, ready)
 
 	for i := 1; i < a.pumpRoutines; i++ {
-		go a.pump(table, routineRows)
+		go a.pump(table, routineRows, nil)
 	}
 }
 
@@ -98,9 +113,9 @@ func (a *App) routineRows() (routineRows0, routineRows int) {
 	return routineRows0, routineRows
 }
 
-func (a *App) pump(pumpTable string, rows int) {
+func (a *App) pump(pumpTable string, rows int, ready chan bool) {
 	c := model.PumpConfig{PumpMinRows: rows, PumpMaxRows: rows, BatchNum: a.batchNum}
-	if err := a.schema.Pump(pumpTable, a.pumpedRows, c); err != nil {
+	if err := a.schema.Pump(pumpTable, a.pumpedRows, c, ready); err != nil {
 		panic(err)
 	}
 }

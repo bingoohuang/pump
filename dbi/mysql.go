@@ -82,6 +82,8 @@ type MySQLSchema struct {
 	dbFn          func() (*gorm.DB, error)
 	pumpOptionReg *regexp.Regexp
 	compatibleDs  string
+
+	verbose bool
 }
 
 var _ model.DbSchema = (*MySQLSchema)(nil)
@@ -173,7 +175,8 @@ func ParseTable(table string) (schemaName, tableName string) {
 }
 
 // Pump ...
-func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, config model.PumpConfig) error {
+func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped,
+	config model.PumpConfig, ready chan bool) error {
 	columns, err := m.TableColumns(table)
 	if err != nil {
 		return err
@@ -194,7 +197,9 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, conf
 	batch := NewInsertBatch(table, columnNames, config.BatchNum, db, func(rows int) {
 		rowsPumped <- model.RowsPumped{Table: table, Rows: rows, Cost: time.Since(t)}
 		t = time.Now()
-	})
+	}, m.verbose)
+
+	ready <- true
 
 	rows := config.RandRows()
 
@@ -292,6 +297,11 @@ func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.ColumnRandomize
 		val, _ := faker.FakeColumnWithType(c.zeroType(), pumpOption)
 		return val
 	})
+}
+
+// SetVerbose set verbose mode
+func (m *MySQLSchema) SetVerbose(verbose bool) {
+	m.verbose = verbose
 }
 
 // IsAutoIncrement tells if the col is auto_increment or not.

@@ -3,6 +3,7 @@ package random
 import (
 	"math/rand"
 	"time"
+	"unicode/utf8"
 )
 
 // RuneRandom ...
@@ -20,23 +21,35 @@ func MakeRuneRandom() *RuneRandom {
 }
 
 // Rune ...
-func (rr *RuneRandom) Rune(size int) string {
+func (rr *RuneRandom) Rune(maxSize int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 
-	randRune := make([]rune, size)
+	randRune := make([]rune, maxSize)
 	stdCharsLen := int32(len(rr.stdChars))
 	numbersLen := int32(len(rr.numbers))
 
+	bytesLen := 0
+
 	for i := range randRune {
 		j := r.Int31n(3)
+
+		var ru rune
+
 		switch j {
 		case 0:
-			randRune[i] = rr.stdChars[r.Int31n(stdCharsLen)]
+			ru = rr.stdChars[r.Int31n(stdCharsLen)]
 		case 1:
-			randRune[i] = rr.numbers[r.Int31n(numbersLen)]
+			ru = rr.numbers[r.Int31n(numbersLen)]
 		default:
-			randRune[i] = RandInt(r, 19968, 40869)
+			ru = RandInt(r, 19968, 40869)
 		}
+
+		if bytesLen += utf8.RuneLen(ru); bytesLen >= maxSize {
+			randRune = randRune[0:i]
+			break
+		}
+
+		randRune[i] = ru
 	}
 
 	return string(randRune)

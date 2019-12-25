@@ -36,5 +36,5 @@ func (r *Str) Value() interface{} {
 
 // NewRandomStr ...
 func NewRandomStr(column model.TableColumn) *Str {
-	return &Str{maxSize: column.GetMaxSize().Int64, allowNull: column.IsAllowNull(), rr: MakeRuneRandom()}
+	return &Str{maxSize: column.GetMaxSize().Int64, allowNull: column.IsNullable(), rr: MakeRuneRandom()}
 }

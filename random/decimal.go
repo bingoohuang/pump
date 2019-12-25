@@ -26,5 +26,5 @@ func (r *Decimal) Value() interface{} {
 
 // NewRandomDecimal ...
 func NewRandomDecimal(column model.TableColumn, size int64) *Decimal {
-	return &Decimal{size: size, allowNull: column.IsAllowNull()}
+	return &Decimal{size: size, allowNull: column.IsNullable()}
 }

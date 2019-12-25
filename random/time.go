@@ -33,5 +33,5 @@ func (r *Time) Value() interface{} {
 
 // NewRandomTime ...
 func NewRandomTime(column model.TableColumn) *Time {
-	return &Time{allowNull: column.IsAllowNull()}
+	return &Time{allowNull: column.IsNullable()}
 }

@@ -13,7 +13,7 @@ type Int struct {
 	allowNull bool
 }
 
-var _ model.ColumnRandomizer = (*Int)(nil)
+var _ model.Randomizer = (*Int)(nil)
 
 // IntZero ...
 func IntZero() reflect.Type {
@@ -27,5 +27,5 @@ func (r Int) Value() interface{} {
 
 // NewRandomInt ...
 func NewRandomInt(col model.TableColumn, mask int64) *Int {
-	return &Int{mask: mask, allowNull: col.IsAllowNull()}
+	return &Int{mask: mask, allowNull: col.IsNullable()}
 }

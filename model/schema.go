@@ -15,15 +15,20 @@ type Table interface {
 	GetComment() string
 }
 
-// TableColumn ...
+// TableColumn describes a column in a table.
 type TableColumn interface {
+	// GetName get the column's name.
 	GetName() string
+	// GetComment get the column's comment.
 	GetComment() string
-	GetType() string
+	// GetDataType get the columns's data type
 	GetDataType() string
+	// GetMaxSize get the max size of the column
 	GetMaxSize() sql.NullInt64
-	IsAllowNull() bool
-	GetColumnRandomizer() ColumnRandomizer
+	// IsNullable tells if the column is nullable or not
+	IsNullable() bool
+	// GetRandomizer returns the randomizer of the column
+	GetRandomizer() Randomizer
 }
 
 // PumpColumnConfig  ...

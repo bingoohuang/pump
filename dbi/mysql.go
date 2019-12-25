@@ -51,16 +51,13 @@ type MyTableColumn struct {
 	NumericPrecision sql.NullInt64 `gorm:"column:NUMERIC_PRECISION"`
 	NumericScale     sql.NullInt64 `gorm:"column:NUMERIC_SCALE"`
 
-	randomizer model.ColumnRandomizer
+	randomizer model.Randomizer
 }
 
 var _ model.TableColumn = (*MyTableColumn)(nil)
 
-// IsAllowNull ...
-func (c MyTableColumn) IsAllowNull() bool { return c.Nullable == "YES" }
-
-// GetType ...
-func (c MyTableColumn) GetType() string { return c.Type }
+// IsNullable ...
+func (c MyTableColumn) IsNullable() bool { return c.Nullable == "YES" }
 
 // GetMaxSize ...
 func (c MyTableColumn) GetMaxSize() sql.NullInt64 { return c.MaxLength }
@@ -74,8 +71,8 @@ func (c MyTableColumn) GetName() string { return c.Name }
 // GetComment ...
 func (c MyTableColumn) GetComment() string { return c.Comment }
 
-// GetColumnRandomizer ...
-func (c MyTableColumn) GetColumnRandomizer() model.ColumnRandomizer { return c.randomizer }
+// GetRandomizer ...
+func (c MyTableColumn) GetRandomizer() model.Randomizer { return c.randomizer }
 
 // MySQLSchema ...
 type MySQLSchema struct {
@@ -218,7 +215,7 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped,
 	return nil
 }
 
-func makeInsertColumns(randMap map[string]model.ColumnRandomizer, columns []model.TableColumn) []string {
+func makeInsertColumns(randMap map[string]model.Randomizer, columns []model.TableColumn) []string {
 	columnNames := make([]string, len(randMap))
 
 	i := 0
@@ -233,11 +230,11 @@ func makeInsertColumns(randMap map[string]model.ColumnRandomizer, columns []mode
 	return columnNames
 }
 
-func makeRandomizerMap(columns []model.TableColumn) map[string]model.ColumnRandomizer {
-	randMap := make(map[string]model.ColumnRandomizer)
+func makeRandomizerMap(columns []model.TableColumn) map[string]model.Randomizer {
+	randMap := make(map[string]model.Randomizer)
 
 	for _, col := range columns {
-		if r := col.GetColumnRandomizer(); r != nil {
+		if r := col.GetRandomizer(); r != nil {
 			randMap[col.GetName()] = r
 		}
 	}
@@ -245,7 +242,7 @@ func makeRandomizerMap(columns []model.TableColumn) map[string]model.ColumnRando
 	return randMap
 }
 
-func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.ColumnRandomizer {
+func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 	sub := m.pumpOptionReg.FindStringSubmatch(c.GetComment())
 	pumpOption := ""
 
@@ -334,7 +331,7 @@ func (c MyTableColumn) zeroType() reflect.Type {
 	return reflect.TypeOf(nil)
 }
 
-func (c MyTableColumn) randomColumn() model.ColumnRandomizer {
+func (c MyTableColumn) randomColumn() model.Randomizer {
 	typ := c.GetDataType()
 	switch typ {
 	case "tinyint", "smallint", "mediumint", "int", "integer", "bigint":

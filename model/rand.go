@@ -1,6 +1,6 @@
 package model
 
-// ColumnRandomizer ...
-type ColumnRandomizer interface {
+// Randomizer ...
+type Randomizer interface {
 	Value() interface{}
 }

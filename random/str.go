@@ -20,6 +20,7 @@ func StrZero() reflect.Type {
 }
 
 // Value ...
+// nolint gomnd
 func (r *Str) Value() interface{} {
 	if r.allowNull && rand.Int63n(100) < model.NilFrequency {
 		return nil

@@ -15,6 +15,7 @@ import (
 func InitFlags() {
 	help := pflag.BoolP("help", "h", false, "help")
 	pflag.StringP("sqls", "s", "", "execute sqls, separated by ;")
+	pflag.BoolP("eval", "e", false, "eval sqls execution in REPL mode")
 	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
 
 	pflag.StringP("ds", "d", "", `eg. 

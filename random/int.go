@@ -17,7 +17,7 @@ var _ model.Randomizer = (*Int)(nil)
 
 // IntZero ...
 func IntZero() reflect.Type {
-	return reflect.TypeOf(int64(1))
+	return reflect.TypeOf(int64(1)) // nolint gomnd
 }
 
 // Value ...

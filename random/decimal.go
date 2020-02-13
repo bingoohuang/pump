@@ -16,7 +16,7 @@ type Decimal struct {
 
 // DecimalZero ...
 func DecimalZero() reflect.Type {
-	return reflect.TypeOf(0.0)
+	return reflect.TypeOf(0.0) // nolint gomnd
 }
 
 // Value ...

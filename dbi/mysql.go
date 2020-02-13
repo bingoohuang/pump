@@ -242,6 +242,7 @@ func makeRandomizerMap(columns []model.TableColumn) map[string]model.Randomizer 
 	return randMap
 }
 
+// nolint gomnd
 func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 	sub := m.pumpOptionReg.FindStringSubmatch(c.GetComment())
 	pumpOption := ""
@@ -331,6 +332,7 @@ func (c MyTableColumn) zeroType() reflect.Type {
 	return reflect.TypeOf(nil)
 }
 
+// nolint gomnd
 func (c MyTableColumn) randomColumn() model.Randomizer {
 	typ := c.GetDataType()
 	switch typ {

@@ -111,6 +111,31 @@ CREATE TABLE `test_ecdocument_signatory_uuid`
   DEFAULT CHARSET = utf8mb4 COMMENT ='签署方表';
 ```
 
+## Eval mode
+
+```bash
+$ pump -d "127.0.0.1 user/pass db=mydb" -V -e
+INFO[0000] dataSourceName:user:pass@tcp(127.0.0.1:3306)/mydb?charset=utf8mb4&parseTime=true&loc=Local
+Enter your sql (empty to re-execute) : select * from t_server
+2020/02/13 10:55:16 SQL: select * from t_server
+2020/02/13 10:55:16 cost: 610.248µs
++---+----+-------------+------+-------+
+| # | ID | SERVER      | PORT | STATE |
++---+----+-------------+------+-------+
+| 1 | 1  | 192.168.1.1 | 8001 | 1     |
+| 2 | 2  | 192.168.1.2 | 8001 | 1     |
++---+----+-------------+------+-------+
+Enter your sql (empty to re-execute) :
+2020/02/13 10:55:25 SQL: select * from t_server
+2020/02/13 10:55:25 cost: 6.6981ms
++---+----+-------------+------+-------+
+| # | ID | SERVER      | PORT | STATE |
++---+----+-------------+------+-------+
+| 1 | 1  | 192.168.1.1 | 8001 | 1     |
+| 2 | 2  | 192.168.1.2 | 8001 | 1     |
++---+----+-------------+------+-------+
+Enter your sql (empty to re-execute) :
+```
 
 ## Thanks
 

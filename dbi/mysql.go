@@ -78,7 +78,7 @@ func (c MyTableColumn) GetRandomizer() model.Randomizer { return c.randomizer }
 type MySQLSchema struct {
 	dbFn          func() (*gorm.DB, error)
 	pumpOptionReg *regexp.Regexp
-	compatibleDs  string
+	DS            string
 
 	verbose bool
 }
@@ -87,20 +87,18 @@ var _ model.DbSchema = (*MySQLSchema)(nil)
 
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
-	compatibleDs := ds.CompatibleMySQLDs(dataSourceName)
-	logrus.Infof("dataSourceName:%s", compatibleDs)
-
-	dbFn := func() (*gorm.DB, error) { return sqlmore.NewSQLMore("mysql", compatibleDs).GormOpen() }
+	ds := ds.CompatibleMySQLDs(dataSourceName)
+	more := sqlmore.NewSQLMore("mysql", ds)
 
 	return &MySQLSchema{
-		dbFn:          dbFn,
+		dbFn:          more.GormOpen,
 		pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`),
-		compatibleDs:  compatibleDs,
+		DS:            more.EnhancedDbURI,
 	}, nil
 }
 
 // CompatibleDs returns the dataSourceName from various the compatible format.
-func (m MySQLSchema) CompatibleDs() string { return m.compatibleDs }
+func (m MySQLSchema) CompatibleDs() string { return m.DS }
 
 // Tables ...
 func (m MySQLSchema) Tables() ([]model.Table, error) {
@@ -300,6 +298,10 @@ func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 // SetVerbose set verbose mode
 func (m *MySQLSchema) SetVerbose(verbose bool) {
 	m.verbose = verbose
+
+	if verbose {
+		logrus.Infof("dataSourceName:%s", m.DS)
+	}
 }
 
 // IsAutoIncrement tells if the col is auto_increment or not.

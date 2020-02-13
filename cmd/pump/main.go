@@ -1,6 +1,9 @@
 package main
 
 import (
+	"fmt"
+	"os"
+
 	"github.com/bingoohuang/gou/str"
 	"github.com/bingoohuang/pump/util"
 	"github.com/gosuri/uiprogress"
@@ -38,12 +41,11 @@ func MakeApp() *App {
 		panic(err)
 	}
 
-	totalRows := viper.GetInt("rows")
 	a := &App{
 		pumpTables:   str.SplitTrim(viper.GetString("tables"), ","),
 		pumpRoutines: viper.GetInt("goroutines"),
 		schema:       schema,
-		totalRows:    totalRows,
+		totalRows:    viper.GetInt("rows"),
 		batchNum:     viper.GetInt("batch"),
 	}
 	a.pumpedRows = make(chan model.RowsPumped, len(a.pumpTables)*a.pumpRoutines)
@@ -54,6 +56,11 @@ func MakeApp() *App {
 }
 
 func (a *App) pumpingTables() {
+	if len(a.pumpTables) == 0 {
+		fmt.Println("no tables to pump")
+		os.Exit(0)
+	}
+
 	rows := make(map[string]*model.RowsPumped)
 	complete := make(map[string]bool)
 

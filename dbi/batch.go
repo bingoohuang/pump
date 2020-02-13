@@ -3,6 +3,7 @@ package dbi
 import (
 	"fmt"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -50,7 +51,11 @@ func NewInsertBatch(table string, columnNames []string,
 	bind := "(" + str.Repeat("?", ",", b.columnCount) + ")"
 	sql := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
 	b.batchSQL = sql + str.Repeat(bind, ",", batchNum)
-	logrus.Infof("batchSQL:%s", b.batchSQL)
+
+	if verbose {
+		logrus.Infof("batchSQL:%s", b.batchSQL)
+	}
+
 	b.completeSQL = func() string { return sql + str.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
 	b.verbose = verbose
@@ -107,7 +112,13 @@ func (b *InsertBatcher) executeBatch(sql string) {
 		logrus.Info(abbr)
 	}
 
-	b.db.Exec(sql, b.rows...)
+	db := b.db.Exec(sql, b.rows...)
+
+	if db.Error != nil {
+		logrus.Println(db.Error.Error())
+		os.Exit(-1)
+	}
+
 	b.batchExecuted++
 	b.batchOp(b.rowsCount)
 	b.rowsCount = 0

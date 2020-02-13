@@ -31,6 +31,10 @@ func (a *App) executeSqls() {
 		a.executeSQLs(db, subSqls)
 	}
 
+	if !eval {
+		return
+	}
+
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {

@@ -140,3 +140,4 @@ Enter your sql (empty to re-execute) :
 ## Thanks
 
 1. [MySQL random data loader](https://github.com/Percona-Lab/mysql_random_data_load)
+1. [Go访问MySQL异常排查及浅析其超时机制](https://cloud.tencent.com/developer/article/1390124)

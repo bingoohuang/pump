@@ -53,7 +53,8 @@ func NewInsertBatch(table string, columnNames []string,
 	b.batchSQL = sql + str.Repeat(bind, ",", batchNum)
 
 	if verbose {
-		logrus.Infof("batchSQL:%s", b.batchSQL)
+		abbr, _ := goutils.Abbreviate(b.batchSQL, 500)
+		logrus.Infof("batchSQL:%s", abbr)
 	}
 
 	b.completeSQL = func() string { return sql + str.Repeat(bind, ",", b.rowsCount) }

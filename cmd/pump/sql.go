@@ -38,7 +38,7 @@ func (a *App) executeSqls() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Print("Enter your sql (empty to re-execute) :")
+		fmt.Print("Enter your sql (empty to re-execute): ")
 		scanner.Scan()
 		text := strings.TrimSpace(scanner.Text())
 

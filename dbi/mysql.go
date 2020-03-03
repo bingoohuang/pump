@@ -10,8 +10,6 @@ import (
 
 	"github.com/sirupsen/logrus"
 
-	"github.com/bingoohuang/pump/ds"
-
 	gouio "github.com/bingoohuang/gou/io"
 	"github.com/bingoohuang/gou/str"
 
@@ -87,7 +85,7 @@ var _ model.DbSchema = (*MySQLSchema)(nil)
 
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
-	ds := ds.CompatibleMySQLDs(dataSourceName)
+	ds := sqlmore.CompatibleMySQLDs(dataSourceName)
 	more := sqlmore.NewSQLMore("mysql", ds)
 
 	return &MySQLSchema{

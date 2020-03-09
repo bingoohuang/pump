@@ -1,7 +1,6 @@
 package model
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 
@@ -24,11 +23,13 @@ type TableColumn interface {
 	// GetDataType get the columns's data type
 	GetDataType() string
 	// GetMaxSize get the max size of the column
-	GetMaxSize() sql.NullInt64
+	GetMaxSize() int
 	// IsNullable tells if the column is nullable or not
 	IsNullable() bool
 	// GetRandomizer returns the randomizer of the column
 	GetRandomizer() Randomizer
+	// GetCharacterSet returns the CharacterSet of the column
+	GetCharacterSet() string
 }
 
 // PumpColumnConfig  ...
@@ -100,5 +101,6 @@ type DbSchema interface {
 	TableColumns(table string) ([]TableColumn, error)
 	// CompatibleDs returns the dataSourceName from various the compatible format.
 	CompatibleDs() string
-	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig, ready chan bool) error
+	Pump(table string, rowsPumped chan<- RowsPumped, config PumpConfig, ready chan bool,
+		onerr string, retryMaxTimes int) error
 }

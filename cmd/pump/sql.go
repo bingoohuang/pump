@@ -8,13 +8,15 @@ import (
 	"os"
 	"strings"
 
-	"github.com/bingoohuang/sqlmore"
+	"github.com/sirupsen/logrus"
+
+	"github.com/bingoohuang/sqlx"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
 
 func (a *App) executeSqls() {
-	subSqls := sqlmore.SplitSqls(viper.GetString("sqls"), ';')
+	subSqls := sqlx.SplitSqls(viper.GetString("sqls"), ';')
 	eval := viper.GetBool("eval")
 
 	if len(subSqls) == 0 && !eval {
@@ -23,7 +25,7 @@ func (a *App) executeSqls() {
 
 	defer os.Exit(0)
 
-	db := sqlmore.NewSQLMore("mysql", a.schema.CompatibleDs()).MustOpen()
+	db := sqlx.NewSQLMore("mysql", a.schema.CompatibleDs()).MustOpen()
 	//db, _ := sql.Open("mysql", a.schema.CompatibleDs())
 	defer db.Close()
 
@@ -43,7 +45,7 @@ func (a *App) executeSqls() {
 		text := strings.TrimSpace(scanner.Text())
 
 		if text != "" {
-			subSqls = sqlmore.SplitSqls(text, ';')
+			subSqls = sqlx.SplitSqls(text, ';')
 		}
 
 		a.executeSQLs(db, subSqls)
@@ -53,21 +55,20 @@ func (a *App) executeSqls() {
 func (a *App) executeSQLs(db *sql.DB, subSqls []string) {
 	tx, err := db.Begin()
 	if err != nil {
-		log.Println(err)
-		return
+		logrus.Panicf("failed to begin %v", err)
 	}
 
 	defer func() { _ = tx.Commit() }() // nolint errcheck
 
 	for _, s := range subSqls {
-		r := sqlmore.ExecSQL(tx, s, 3000, "NULL")
+		r := sqlx.ExecSQL(tx, s, 3000, "NULL")
 		a.printResult(s, r)
 	}
 }
 
-func (a *App) printResult(s string, r sqlmore.ExecResult) {
+func (a *App) printResult(s string, r sqlx.ExecResult) {
 	if r.Error != nil {
-		log.Println(r.Error)
+		logrus.Panicf("error occurred %v", r.Error)
 		return
 	}
 

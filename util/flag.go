@@ -16,6 +16,8 @@ func InitFlags() {
 	help := pflag.BoolP("help", "h", false, "help")
 	pflag.StringP("sqls", "s", "", "execute sqls, separated by ;")
 	pflag.BoolP("eval", "e", false, "eval sqls execution in REPL mode")
+	pflag.StringP("onerr", "", "retry", "retry on error or not")
+	pflag.IntP("retry", "", 0, "retry max times")
 	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
 
 	pflag.StringP("ds", "d", "", `eg. 
@@ -33,7 +35,7 @@ func InitFlags() {
 	pflag.IntP("batch", "b", 1000, "batch rows")
 	pflag.StringP("sleep", "", "", "sleep after each batch, eg. 10s (ns/us/µs/ms/s/m/h)")
 	pflag.IntP("goroutines", "g", 1, "go routines to pump for each table")
-	pflag.BoolP("verbose", "V", false, "verbose details")
+	pflag.IntP("verbose", "V", 0, "verbose details(0 off, 1 abbreviated, 2 full")
 
 	pprofAddr := htt.PprofAddrPflag()
 

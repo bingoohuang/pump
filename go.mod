@@ -7,17 +7,17 @@ require (
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
 	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
-	github.com/bingoohuang/sqlmore v0.0.0-20200303142849-1a6eb040f63f
+	github.com/bingoohuang/sqlx v0.0.0-20200309064135-ee889b068a82
+	github.com/gdamore/encoding v1.0.0
 	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gosuri/uilive v0.0.3 // indirect
 	github.com/gosuri/uiprogress v0.0.1
 	github.com/jedib0t/go-pretty v4.3.0+incompatible
-	github.com/jinzhu/gorm v1.9.11
+	github.com/jinzhu/gorm v1.9.11 // indirect
 	github.com/json-iterator/go v1.1.8 // indirect
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
-	github.com/leodido/go-urn v1.2.0 // indirect
 	github.com/mattn/go-isatty v0.0.10 // indirect
 	github.com/pelletier/go-toml v1.6.0 // indirect
 	github.com/sirupsen/logrus v1.4.2

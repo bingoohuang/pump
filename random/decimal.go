@@ -10,7 +10,7 @@ import (
 
 // Decimal holds unexported data for decimal values
 type Decimal struct {
-	size      int64
+	size      int
 	allowNull bool
 }
 
@@ -21,10 +21,10 @@ func DecimalZero() reflect.Type {
 
 // Value ...
 func (r *Decimal) Value() interface{} {
-	return rand.Float64() * float64(rand.Int63n(int64(math.Pow10(int(r.size)))))
+	return rand.Float64() * float64(rand.Int63n(int64(math.Pow10(r.size))))
 }
 
 // NewRandomDecimal ...
-func NewRandomDecimal(column model.TableColumn, size int64) *Decimal {
+func NewRandomDecimal(column model.TableColumn, size int) *Decimal {
 	return &Decimal{size: size, allowNull: column.IsNullable()}
 }

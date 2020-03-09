@@ -13,18 +13,17 @@ import (
 	gouio "github.com/bingoohuang/gou/io"
 	"github.com/bingoohuang/gou/str"
 
-	"github.com/bingoohuang/sqlmore"
+	"github.com/bingoohuang/sqlx"
 
 	"github.com/bingoohuang/faker"
 	"github.com/bingoohuang/pump/model"
 	"github.com/bingoohuang/pump/random"
-	"github.com/jinzhu/gorm"
 )
 
 // MySQLTable ...
 type MySQLTable struct {
-	Name    string `gorm:"column:TABLE_NAME"`
-	Comment string `gorm:"column:TABLE_COMMENT"`
+	Name    string `name:"TABLE_NAME"`
+	Comment string `name:"TABLE_COMMENT"`
 }
 
 var _ model.Table = (*MySQLTable)(nil)
@@ -37,17 +36,18 @@ func (m MySQLTable) GetComment() string { return m.Comment }
 
 // MyTableColumn ...
 type MyTableColumn struct {
-	Name      string         `gorm:"column:COLUMN_NAME"`
-	Type      string         `gorm:"column:COLUMN_TYPE"`
-	Extra     string         `gorm:"column:EXTRA"` // auto_increment
-	Comment   string         `gorm:"column:COLUMN_COMMENT"`
-	DataType  string         `gorm:"column:DATA_TYPE"`
-	MaxLength sql.NullInt64  `gorm:"column:CHARACTER_MAXIMUM_LENGTH"`
-	Nullable  string         `gorm:"column:IS_NULLABLE"`
-	Default   sql.NullString `gorm:"column:COLUMN_DEFAULT"`
+	Name         string `name:"COLUMN_NAME"`
+	Type         string `name:"COLUMN_TYPE"`
+	Extra        string `name:"EXTRA"` // auto_increment
+	Comment      string `name:"COLUMN_COMMENT"`
+	DataType     string `name:"DATA_TYPE"`
+	MaxLength    int    `name:"CHARACTER_MAXIMUM_LENGTH"`
+	Nullable     string `name:"IS_NULLABLE"`
+	Default      string `name:"COLUMN_DEFAULT"`
+	CharacterSet string `name:"CHARACTER_SET_NAME"`
 
-	NumericPrecision sql.NullInt64 `gorm:"column:NUMERIC_PRECISION"`
-	NumericScale     sql.NullInt64 `gorm:"column:NUMERIC_SCALE"`
+	NumericPrecision int `name:"NUMERIC_PRECISION"`
+	NumericScale     int `name:"NUMERIC_SCALE"`
 
 	randomizer model.Randomizer
 }
@@ -58,7 +58,7 @@ var _ model.TableColumn = (*MyTableColumn)(nil)
 func (c MyTableColumn) IsNullable() bool { return c.Nullable == "YES" }
 
 // GetMaxSize ...
-func (c MyTableColumn) GetMaxSize() sql.NullInt64 { return c.MaxLength }
+func (c MyTableColumn) GetMaxSize() int { return c.MaxLength }
 
 // GetDataType ...
 func (c MyTableColumn) GetDataType() string { return c.DataType }
@@ -72,24 +72,27 @@ func (c MyTableColumn) GetComment() string { return c.Comment }
 // GetRandomizer ...
 func (c MyTableColumn) GetRandomizer() model.Randomizer { return c.randomizer }
 
+// GetCharacterSet returns the CharacterSet of the column
+func (c MyTableColumn) GetCharacterSet() string { return c.CharacterSet }
+
 // MySQLSchema ...
 type MySQLSchema struct {
-	dbFn          func() (*gorm.DB, error)
+	dbFn          func() (*sql.DB, error)
 	pumpOptionReg *regexp.Regexp
 	DS            string
 
-	verbose bool
+	verbose int
 }
 
 var _ model.DbSchema = (*MySQLSchema)(nil)
 
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
-	ds := sqlmore.CompatibleMySQLDs(dataSourceName)
-	more := sqlmore.NewSQLMore("mysql", ds)
+	ds := sqlx.CompatibleMySQLDs(dataSourceName)
+	more := sqlx.NewSQLMore("mysql", ds)
 
 	return &MySQLSchema{
-		dbFn:          more.GormOpen,
+		dbFn:          more.Open,
 		pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`),
 		DS:            more.EnhancedDbURI,
 	}, nil
@@ -107,12 +110,12 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 
 	defer gouio.Close(db)
 
-	var tables []MySQLTable
+	var dao mysqlSchemaDao
+	if err := sqlx.CreateDao("mysql", db, &dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
+		return nil, err
+	}
 
-	const s = `SELECT * FROM information_schema.TABLES WHERE TABLE_SCHEMA = database()`
-
-	db.Raw(s).Find(&tables)
-
+	tables := dao.GetTables()
 	ts := make([]model.Table, len(tables))
 
 	for i, t := range tables {
@@ -120,7 +123,29 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 		ts[i] = t
 	}
 
-	return ts, db.Error
+	return ts, nil
+}
+
+const mysqlSchemaDaoSQL = `
+-- name: GetTableColumns
+SELECT * FROM information_schema.COLUMNS 
+WHERE TABLE_SCHEMA = :1 AND TABLE_NAME = :2 
+ORDER BY ORDINAL_POSITION;
+
+-- name: GetTableColumnsInCurrentDB
+SELECT * FROM information_schema.COLUMNS 
+WHERE TABLE_SCHEMA = database() AND TABLE_NAME = :1 
+ORDER BY ORDINAL_POSITION;
+
+-- name: GetTables
+SELECT * FROM information_schema.TABLES 
+WHERE TABLE_SCHEMA = database();
+`
+
+type mysqlSchemaDao struct {
+	GetTables                  func() []MySQLTable
+	GetTableColumns            func(schema, table string) []MyTableColumn
+	GetTableColumnsInCurrentDB func(table string) []MyTableColumn
 }
 
 // TableColumns ...
@@ -132,19 +157,19 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 
 	defer gouio.Close(db)
 
-	columns := make([]MyTableColumn, 0)
+	var columns []MyTableColumn
+
 	schema, tableName := ParseTable(table)
 
+	var dao mysqlSchemaDao
+	if err := sqlx.CreateDao("mysql", db, &dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
+		return nil, err
+	}
+
 	if schema != "" {
-		const s = `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? ` +
-			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
-
-		db.Raw(s, schema, tableName).Find(&columns)
+		columns = dao.GetTableColumns(schema, tableName)
 	} else {
-		const s = `SELECT * FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = database() ` +
-			`AND TABLE_NAME = ? ORDER BY ORDINAL_POSITION`
-
-		db.Raw(s, tableName).Find(&columns)
+		columns = dao.GetTableColumnsInCurrentDB(tableName)
 	}
 
 	ts := make([]model.TableColumn, len(columns))
@@ -155,7 +180,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 		ts[i] = t
 	}
 
-	return ts, db.Error
+	return ts, nil
 }
 
 // ParseTable parses the schema and table name from table which may be like db1.t1
@@ -168,8 +193,8 @@ func ParseTable(table string) (schemaName, tableName string) {
 }
 
 // Pump ...
-func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped,
-	config model.PumpConfig, ready chan bool) error {
+func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, config model.PumpConfig,
+	ready chan bool, onerr string, retryMaxTimes int) error {
 	columns, err := m.TableColumns(table)
 	if err != nil {
 		return err
@@ -186,29 +211,75 @@ func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped,
 	defer gouio.Close(db)
 
 	t := time.Now()
+	rows := config.RandRows()
 
 	batch := NewInsertBatch(table, columnNames, config.BatchNum, db, func(rows int) {
 		rowsPumped <- model.RowsPumped{Table: table, Rows: rows, Cost: time.Since(t)}
 		t = time.Now()
-	}, m.verbose)
+	}, m.verbose, rows)
 
 	ready <- true
 
-	rows := config.RandRows()
+	retryState := &retryState{retryMaxTimes: retryMaxTimes, onErr: onerr, verbose: m.verbose}
 
 	for i := 1; i <= rows; i++ {
 		colValues := make([]interface{}, len(columnNames))
-
 		for j, col := range columnNames {
 			colValues[j] = randMap[col].Value()
 		}
 
-		batch.AddRow(colValues)
+		err := batch.AddRow(colValues)
+
+		if retry, err := retryState.retry(err); err != nil {
+			return err
+		} else if retry {
+			i -= batch.GetBatchNum() // revert the whole batch num rows
+		}
 	}
 
-	batch.Complete()
+	retryState.retries = 0
 
-	return nil
+	for {
+		_, err := batch.Complete()
+		if retry, err := retryState.retry(err); err != nil {
+			return err
+		} else if !retry {
+			return nil
+		}
+	}
+}
+
+type retryState struct {
+	retries       int
+	retryMaxTimes int
+	onErr         string
+	verbose       int
+}
+
+func (r *retryState) retry(err error) (bool, error) {
+	if err == nil || r.onErr != "retry" {
+		return false, err
+	}
+
+	if r.verbose > 0 {
+		logrus.Warnf("retry %d after error %v", r.retries, err)
+	}
+
+	if r.retryMaxTimes <= 0 {
+		return true, nil
+	}
+
+	if r.retries >= r.retryMaxTimes {
+		if r.verbose > 0 {
+			logrus.Warnf("retry %d reached max %d", r.retries, r.retryMaxTimes)
+		}
+
+		return false, err
+	}
+
+	r.retries++
+
+	return true, nil
 }
 
 func makeInsertColumns(randMap map[string]model.Randomizer, columns []model.TableColumn) []string {
@@ -294,10 +365,10 @@ func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 }
 
 // SetVerbose set verbose mode
-func (m *MySQLSchema) SetVerbose(verbose bool) {
+func (m *MySQLSchema) SetVerbose(verbose int) {
 	m.verbose = verbose
 
-	if verbose {
+	if verbose > 0 {
 		logrus.Infof("dataSourceName:%s", m.DS)
 	}
 }
@@ -357,11 +428,11 @@ func (c MyTableColumn) randomColumn() model.Randomizer {
 		return random.NewRandomInt(c, maxValue)
 
 	case "float", "decimal", "double":
-		return random.NewRandomDecimal(c, c.NumericPrecision.Int64-c.NumericScale.Int64)
+		return random.NewRandomDecimal(c, c.NumericPrecision-c.NumericScale)
 
-	case "char", "varchar", "tinyblob",
-		"tinytext", "blob", "text", "mediumtext",
-		"mediumblob", "longblob", "longtext":
+	case "char", "varchar",
+		"tinyblob", "blob", "mediumblob", "longblob",
+		"tinytext", "text", "mediumtext", "longtext":
 		return random.NewRandomStr(c)
 
 	case "date":

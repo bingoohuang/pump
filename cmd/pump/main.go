@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/bingoohuang/gou/str"
 	"github.com/bingoohuang/pump/util"
 	"github.com/gosuri/uiprogress"
@@ -30,27 +32,31 @@ type App struct {
 
 	schema model.DbSchema
 
-	pumpedRows chan model.RowsPumped
-	batchNum   int
+	pumpedRows    chan model.RowsPumped
+	batchNum      int
+	onErr         string
+	retryMaxTimes int
 }
 
 // MakeApp ...
 func MakeApp() *App {
 	schema, err := dbi.CreateMySQLSchema(viper.GetString("ds"))
 	if err != nil {
-		panic(err)
+		logrus.Panicf("failed to create datasource, error %v", err)
 	}
 
 	a := &App{
-		pumpTables:   str.SplitTrim(viper.GetString("tables"), ","),
-		pumpRoutines: viper.GetInt("goroutines"),
-		schema:       schema,
-		totalRows:    viper.GetInt("rows"),
-		batchNum:     viper.GetInt("batch"),
+		pumpTables:    str.SplitTrim(viper.GetString("tables"), ","),
+		pumpRoutines:  viper.GetInt("goroutines"),
+		schema:        schema,
+		totalRows:     viper.GetInt("rows"),
+		batchNum:      viper.GetInt("batch"),
+		onErr:         viper.GetString("onerr"),
+		retryMaxTimes: viper.GetInt("retry"),
 	}
 	a.pumpedRows = make(chan model.RowsPumped, len(a.pumpTables)*a.pumpRoutines)
 
-	schema.SetVerbose(viper.GetBool("verbose"))
+	schema.SetVerbose(viper.GetInt("verbose"))
 
 	return a
 }
@@ -80,6 +86,7 @@ func (a *App) pumpingTables() {
 	}
 
 	uiprogress.Start()
+	defer uiprogress.Stop()
 
 	for r := range a.pumpedRows {
 		pumped := rows[r.Table]
@@ -93,8 +100,6 @@ func (a *App) pumpingTables() {
 			break
 		}
 	}
-
-	uiprogress.Stop()
 }
 
 func (a *App) pumpTable(table string, ready chan bool) {
@@ -103,7 +108,7 @@ func (a *App) pumpTable(table string, ready chan bool) {
 	go a.pump(table, routineRows0, ready)
 
 	for i := 1; i < a.pumpRoutines; i++ {
-		go a.pump(table, routineRows, nil)
+		go a.pump(table, routineRows, ready)
 	}
 }
 
@@ -122,7 +127,7 @@ func (a *App) routineRows() (routineRows0, routineRows int) {
 
 func (a *App) pump(pumpTable string, rows int, ready chan bool) {
 	c := model.PumpConfig{PumpMinRows: rows, PumpMaxRows: rows, BatchNum: a.batchNum}
-	if err := a.schema.Pump(pumpTable, a.pumpedRows, c, ready); err != nil {
-		panic(err)
+	if err := a.schema.Pump(pumpTable, a.pumpedRows, c, ready, a.onErr, a.retryMaxTimes); err != nil {
+		logrus.Panicf("pump error %v", err)
 	}
 }

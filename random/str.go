@@ -8,7 +8,7 @@ import (
 	"github.com/sirupsen/logrus"
 
 	"github.com/bingoohuang/pump/model"
-	"golang.org/x/text/encoding/charmap"
+	"github.com/gdamore/encoding"
 )
 
 // Str ...
@@ -74,7 +74,7 @@ func (r *Str) Value() interface{} {
 	   字符序（collat​​ion）：定义了字符的比较规则。
 	*/
 	if FoldContains(r.characterSet, "latin1") {
-		latin1Encoder := charmap.ISO8859_1.NewEncoder()
+		latin1Encoder := encoding.ISO8859_1.NewEncoder()
 		s, err = latin1Encoder.String(s)
 		if err != nil {
 			logrus.Panicf("failed to encode to latin1, error %v", err)

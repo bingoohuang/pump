@@ -8,7 +8,6 @@ require (
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
 	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
 	github.com/bingoohuang/sqlx v0.0.0-20200309064135-ee889b068a82
-	github.com/gdamore/encoding v1.0.0
 	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
@@ -28,6 +27,7 @@ require (
 	go.mongodb.org/mongo-driver v1.1.3 // indirect
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5 // indirect
 	golang.org/x/sys v0.0.0-20191128015809-6d18c012aee9 // indirect
+	golang.org/x/text v0.3.2
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/go-playground/validator.v9 v9.30.2 // indirect
 )

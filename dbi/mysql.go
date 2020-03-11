@@ -129,12 +129,7 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 const mysqlSchemaDaoSQL = `
 -- name: GetTableColumns
 SELECT * FROM information_schema.COLUMNS 
-WHERE TABLE_SCHEMA = :1 AND TABLE_NAME = :2 
-ORDER BY ORDINAL_POSITION;
-
--- name: GetTableColumnsInCurrentDB
-SELECT * FROM information_schema.COLUMNS 
-WHERE TABLE_SCHEMA = database() AND TABLE_NAME = :1 
+WHERE TABLE_SCHEMA = /* if _1 != "" */ :1  /* else */ database() /* end */ AND TABLE_NAME = :2 
 ORDER BY ORDINAL_POSITION;
 
 -- name: GetTables
@@ -143,9 +138,8 @@ WHERE TABLE_SCHEMA = database();
 `
 
 type mysqlSchemaDao struct {
-	GetTables                  func() []MySQLTable
-	GetTableColumns            func(schema, table string) []MyTableColumn
-	GetTableColumnsInCurrentDB func(table string) []MyTableColumn
+	GetTables       func() []MySQLTable
+	GetTableColumns func(schema, table string) []MyTableColumn
 }
 
 // TableColumns ...
@@ -157,8 +151,6 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 
 	defer gouio.Close(db)
 
-	var columns []MyTableColumn
-
 	schema, tableName := ParseTable(table)
 
 	var dao mysqlSchemaDao
@@ -166,11 +158,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 		return nil, err
 	}
 
-	if schema != "" {
-		columns = dao.GetTableColumns(schema, tableName)
-	} else {
-		columns = dao.GetTableColumnsInCurrentDB(tableName)
-	}
+	columns := dao.GetTableColumns(schema, tableName)
 
 	ts := make([]model.TableColumn, len(columns))
 

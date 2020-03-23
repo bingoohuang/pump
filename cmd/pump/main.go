@@ -12,7 +12,6 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/bingoohuang/pump/dbi"
-	_ "github.com/bingoohuang/pump/dbi"
 	"github.com/bingoohuang/pump/model"
 )
 
@@ -30,7 +29,7 @@ type App struct {
 	pumpRoutines int
 	totalRows    int
 
-	schema model.DbSchema
+	schema model.DBSchema
 
 	pumpedRows    chan model.RowsPumped
 	batchNum      int

@@ -1,19 +1,38 @@
 package main
 
 import (
-	"bufio"
+	"bytes"
 	"database/sql"
-	"fmt"
 	"log"
 	"os"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/alecthomas/chroma/quick"
 	"github.com/bingoohuang/sqlx"
+	"github.com/gohxs/readline"
 	"github.com/jedib0t/go-pretty/table"
 	"github.com/spf13/viper"
 )
+
+func dief(err error, format string, args ...interface{}) {
+	if err == nil {
+		return
+	}
+
+	args = append(args, err)
+
+	logrus.Fatalf(format+" error %v", args...)
+}
+
+func display(input string) string {
+	buf := bytes.NewBuffer([]byte{})
+	err := quick.Highlight(buf, input, "mysql", "terminal16m", "monokai")
+	dief(err, "quick.Highlight")
+
+	return buf.String()
+}
 
 func (a *App) executeSqls() {
 	subSqls := sqlx.SplitSqls(viper.GetString("sqls"), ';')
@@ -37,13 +56,14 @@ func (a *App) executeSqls() {
 		return
 	}
 
-	scanner := bufio.NewScanner(os.Stdin)
+	term, err := readline.NewEx(&readline.Config{Prompt: "MySQL> ", Output: display, HistoryFile: ".pump.sql"})
+	dief(err, "readline.NewEx")
 
 	for {
-		fmt.Print("Enter your sql (empty to re-execute): ")
-		scanner.Scan()
-		text := strings.TrimSpace(scanner.Text())
+		line, err := term.Readline()
+		dief(err, "term.Readline")
 
+		text := strings.TrimSpace(line)
 		if text != "" {
 			subSqls = sqlx.SplitSqls(text, ';')
 		}

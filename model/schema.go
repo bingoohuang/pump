@@ -95,8 +95,8 @@ func (p *RowsPumped) Accumulate(r RowsPumped) {
 	_ = p.bar.Set(p.Rows)
 }
 
-// DbSchema ...
-type DbSchema interface {
+// DBSchema ...
+type DBSchema interface {
 	Tables() ([]Table, error)
 	TableColumns(table string) ([]TableColumn, error)
 	// CompatibleDs returns the dataSourceName from various the compatible format.

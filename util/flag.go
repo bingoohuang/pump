@@ -52,6 +52,5 @@ func InitFlags() {
 
 	viper.SetEnvPrefix("PUMP")
 	viper.AutomaticEnv()
-
 	_ = viper.BindPFlags(pflag.CommandLine)
 }

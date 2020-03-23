@@ -84,7 +84,7 @@ type MySQLSchema struct {
 	verbose int
 }
 
-var _ model.DbSchema = (*MySQLSchema)(nil)
+var _ model.DBSchema = (*MySQLSchema)(nil)
 
 // CreateMySQLSchema ...
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {

@@ -7,12 +7,12 @@ require (
 	github.com/alecthomas/chroma v0.7.1
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
 	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
+	github.com/bingoohuang/goreflect v0.0.0-20200307035238-25f6dd474d12 // indirect
 	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
-	github.com/bingoohuang/sqlx v0.0.0-20200311021522-e30d48a3ce2f
+	github.com/bingoohuang/sqlx v0.0.0-20200401041240-bd7550bb241f
 	github.com/chzyer/logex v1.1.10 // indirect
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/gdamore/encoding v1.0.0
-	github.com/gin-gonic/gin v1.5.0 // indirect
 	github.com/go-playground/universal-translator v0.17.0 // indirect
 	github.com/go-sql-driver/mysql v1.4.1
 	github.com/gohxs/readline v0.0.0-20171011095936-a780388e6e7c

@@ -44,7 +44,7 @@ func (a *App) executeSqls() {
 
 	defer os.Exit(0)
 
-	db := sqlx.NewSQLMore("mysql", a.schema.CompatibleDs()).MustOpen()
+	db := sqlx.NewSQLMore("mysql", a.schema.CompatibleDs()).Open()
 	//db, _ := sql.Open("mysql", a.schema.CompatibleDs())
 	defer db.Close()
 

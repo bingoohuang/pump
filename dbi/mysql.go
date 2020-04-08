@@ -92,9 +92,9 @@ func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	more := sqlx.NewSQLMore("mysql", ds)
 
 	return &MySQLSchema{
-		dbFn:          more.Open,
+		dbFn:          more.OpenE,
 		pumpOptionReg: regexp.MustCompile(`\bpump:"([^"]+)"`),
-		DS:            more.EnhancedDbURI,
+		DS:            more.EnhancedURI,
 	}, nil
 }
 
@@ -110,8 +110,10 @@ func (m MySQLSchema) Tables() ([]model.Table, error) {
 
 	defer gouio.Close(db)
 
+	sqlx.DB = db
+
 	var dao mysqlSchemaDao
-	if err := sqlx.CreateDao("mysql", db, &dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
+	if err := sqlx.CreateDao(&dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
 		return nil, err
 	}
 
@@ -154,7 +156,10 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	schema, tableName := ParseTable(table)
 
 	var dao mysqlSchemaDao
-	if err := sqlx.CreateDao("mysql", db, &dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
+
+	sqlx.DB = db
+
+	if err := sqlx.CreateDao(&dao, sqlx.WithSQLStr(mysqlSchemaDaoSQL)); err != nil {
 		return nil, err
 	}
 

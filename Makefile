@@ -8,12 +8,27 @@ default:
 
 install:
 	go install -ldflags="-s -w" ./...
+	ls -lh ~/go/bin/$(APPNAME)*
+
+installlinux:
+	env GOOS=linux GOARCH=amd64 go install -ldflags="-s -w" ./...
+	ls -lh ~/go/bin/linux_amd64/$(APPNAME)*
+
+packagelinux:installlinux
+	ls -lh ~/go/bin/linux_amd64/$(APPNAME)*
+	upx ~/go/bin/linux_amd64/$(APPNAME)
+	ls -lh ~/go/bin/linux_amd64/$(APPNAME)*
+	mv ~/go/bin/linux_amd64/$(APPNAME) ~/go/bin/linux_amd64/$(APPNAME)-linux_amd64
+	gzip -f ~/go/bin/linux_amd64/$(APPNAME)-linux_amd64
+	ls -lh ~/go/bin/linux_amd64/$(APPNAME)*
 
 package: install
+	ls -lh ~/go/bin/$(APPNAME)*
 	upx ~/go/bin/$(APPNAME)
+	ls -lh ~/go/bin/$(APPNAME)*
 	mv ~/go/bin/$(APPNAME) ~/go/bin/$(APPNAME)-darwin-amd64
-	gzip ~/go/bin/$(APPNAME)-darwin-amd64
-
+	gzip -f ~/go/bin/$(APPNAME)-darwin-amd64
+	ls -lh ~/go/bin/$(APPNAME)*
 test:
 	go test ./...
 

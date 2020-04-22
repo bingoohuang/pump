@@ -1,26 +1,36 @@
 # pump
 pump random data into tables
 
-Build: 
-
-1. `go fmt ./...&&goimports -w .&&golint ./...&&golangci-lint run --enable-all&& go install ./...`
-1. `env GOOS=linux GOARCH=amd64 go install ./...`
+Build:  `make install` or `make installlinux`
 
 examples:
 
 ```bash
 $ pump -h
-Built on 2019-07-02 12:40:30 +0800 by go version go1.12.6 darwin/amd64 from sha1 2019-07-01 22:30:39 +0800 @b10916c8696bba63d9de402f4a9e2f5b3da6d3af @
+Built on 2019-12-13 17:24:45 +0800 by go version go1.13.5 darwin/amd64 from sha1 2019-12-05 22:44:08 +0800 @293ac94d9d8f5bad8d92405a60786a0a9ce9375d @
   -b, --batch int           batch rows (default 1000)
-      --ds string           eg. user:pass@tcp(localhost:3306)/db?charset=utf8mb4&parseTime=true&loc=Local
-      --fmt string          query sql execution result printing format(txt/markdown/html/csv) (default "txt")
+  -d, --ds string           eg. 
+                                MYSQL_PWD=8BE4 mysql -h 127.0.0.1 -P 9633 -u root
+                                mysql -h 127.0.0.1 -P 9633 -u root -p8BE4
+                                mysql -h 127.0.0.1 -P 9633 -u root -p8BE4 -Dtest
+                                mysql -h127.0.0.1 -u root -p8BE4 -Dtest
+                                127.0.0.1:9633 root/8BE4
+                                127.0.0.1 root/8BE4
+                                127.0.0.1:9633 root/8BE4 db=test
+                                root:8BE4@tcp(127.0.0.1:9633)/?charset=utf8mb4&parseTime=true&loc=Local
+                            
+  -e, --eval                eval sqls execution in REPL mode
+  -f, --fmt string          query sql execution result printing format(txt/markdown/html/csv) (default "txt")
   -g, --goroutines int      go routines to pump for each table (default 1)
   -h, --help                help
+      --onerr string        retry on error or not (default "retry")
       --pprof-addr string   pprof address to listen on, not activate pprof if empty, eg. --pprof-addr localhost:6060
-      --rows int            pump rows (default 1000)
-      --sleep int           sleep milli-seconds after a batch
-      --sqls string         execute sqls, separated by ;
+      --retry int           retry max times
+  -r, --rows int            pump total rows (default 1000)
+      --sleep string        sleep after each batch, eg. 10s (ns/us/µs/ms/s/m/h)
+  -s, --sqls string         execute sqls, separated by ;
   -t, --tables string       pump tables, separated by ,
+  -V, --verbose int         verbose details(0 off, 1 abbreviated, 2 full
 
 ./pump --ds "xx:yyy@tcp(a.b.c.d:3306)/e?charset=utf8mb4&parseTime=true&loc=Local&timeout=10s&writeTimeout=10s&readTimeout=10s" -t test_ecdocument_signatory_uuid --rows 100000
 test_ecdocument_signatory_uuid pumped 334(100.00%) rows cost 689ms/5m10s901ms

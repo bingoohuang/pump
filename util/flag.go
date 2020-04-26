@@ -20,7 +20,7 @@ func InitFlags() {
 	pflag.IntP("retry", "", 0, "retry max times")
 	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
 
-	pflag.StringP("ds", "d", "", `eg. 
+	pflag.StringP("ds", "d", "", `eg.
 	MYSQL_PWD=8BE4 mysql -h 127.0.0.1 -P 9633 -u root
 	mysql -h 127.0.0.1 -P 9633 -u root -p8BE4
 	mysql -h 127.0.0.1 -P 9633 -u root -p8BE4 -Dtest
@@ -43,7 +43,7 @@ func InitFlags() {
 	cnf.CheckUnknownPFlags()
 
 	if *help {
-		fmt.Printf("Built on %s from sha1 %s\n", Compile, Version)
+		fmt.Printf("v1.0.1 Built on %s from sha1 %s\n", Compile, Version)
 		pflag.PrintDefaults()
 		os.Exit(0)
 	}

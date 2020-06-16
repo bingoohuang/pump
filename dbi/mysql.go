@@ -3,16 +3,10 @@ package dbi
 import (
 	"database/sql"
 	"log"
-	"net"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
-
-	"github.com/bingoohuang/gonet"
-
-	"github.com/go-sql-driver/mysql"
-	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"
 
@@ -96,30 +90,6 @@ var _ model.DBSchema = (*MySQLSchema)(nil)
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	ds := sqlx.CompatibleMySQLDs(dataSourceName)
 	more := sqlx.NewSQLMore("mysql", ds)
-
-	// https://stackoverflow.com/questions/33768557/how-to-bind-an-http-client-in-go-to-an-ip-address
-	if bindAddress := viper.GetString("bindAddress"); bindAddress != "" {
-		localAddr := bindAddress
-
-		if !gonet.IsIP(bindAddress) {
-			ipAddr, err := net.ResolveIPAddr("ip", bindAddress)
-			if err != nil {
-				panic(err)
-			}
-
-			localAddr = ipAddr.IP.String()
-		}
-
-		// nolint:gomnd
-		nd := net.Dialer{
-			LocalAddr: &net.TCPAddr{IP: net.ParseIP(localAddr)},
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}
-
-		// https://gist.github.com/jayjanssen/8e74bc4c5bdefc880ffd
-		mysql.RegisterDial(`tcp`, func(addr string) (net.Conn, error) { return nd.Dial(`tcp`, addr) })
-	}
 
 	return &MySQLSchema{
 		dbFn:          more.OpenE,

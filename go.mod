@@ -9,7 +9,7 @@ require (
 	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867
 	github.com/bingoohuang/goreflect v0.0.0-20200307035238-25f6dd474d12 // indirect
 	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
-	github.com/bingoohuang/sqlx v0.0.0-20200616095612-3d1969496312
+	github.com/bingoohuang/sqlx v0.0.0-20200616110850-f26bdfaa73c2
 	github.com/chzyer/logex v1.1.10 // indirect
 	github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1 // indirect
 	github.com/gdamore/encoding v1.0.0

@@ -9,6 +9,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/bingoohuang/gonet"
+
 	"github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 
@@ -97,14 +99,20 @@ func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 
 	// https://stackoverflow.com/questions/33768557/how-to-bind-an-http-client-in-go-to-an-ip-address
 	if bindAddress := viper.GetString("bindAddress"); bindAddress != "" {
-		localAddr, err := net.ResolveIPAddr("ip", bindAddress)
-		if err != nil {
-			panic(err)
+		localAddr := bindAddress
+
+		if !gonet.IsIP(bindAddress) {
+			ipAddr, err := net.ResolveIPAddr("ip", bindAddress)
+			if err != nil {
+				panic(err)
+			}
+
+			localAddr = ipAddr.IP.String()
 		}
 
 		// nolint:gomnd
 		nd := net.Dialer{
-			LocalAddr: &net.TCPAddr{IP: localAddr.IP},
+			LocalAddr: &net.TCPAddr{IP: net.ParseIP(localAddr)},
 			Timeout:   30 * time.Second,
 			KeepAlive: 30 * time.Second,
 		}

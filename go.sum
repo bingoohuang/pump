@@ -50,8 +50,8 @@ github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46 h1:18kysBxDTlkUYNh
 github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46/go.mod h1:lfM/iBkZzlmnl23C+mpqiXAgC6npikzZkKVfNAdC+o4=
 github.com/bingoohuang/shellwords v0.0.0-20200303142623-5c675e52d3e1 h1:ZOxJ0X7A0Y0hJHVuPfERGZO34N6DUFZj4aH2Kw1Y1J4=
 github.com/bingoohuang/shellwords v0.0.0-20200303142623-5c675e52d3e1/go.mod h1:4ETdbVSa47WB7cYJb4ke+44RDYW6WHMIe+YbvQRmcKk=
-github.com/bingoohuang/sqlx v0.0.0-20200401041240-bd7550bb241f h1:xkxVimQsCtbNjoHy7K7/QmaomvTf73pJsupNU2tH9Rk=
-github.com/bingoohuang/sqlx v0.0.0-20200401041240-bd7550bb241f/go.mod h1:nftJJGt3T0YdkhX7e4CjvOC3IqzaPRzDDAEdsdMmUVo=
+github.com/bingoohuang/sqlx v0.0.0-20200616095612-3d1969496312 h1:vlJaM9ehjxjy1HDS3CItgKWVuPBlyC9wNlMCNil06jg=
+github.com/bingoohuang/sqlx v0.0.0-20200616095612-3d1969496312/go.mod h1:nftJJGt3T0YdkhX7e4CjvOC3IqzaPRzDDAEdsdMmUVo=
 github.com/bingoohuang/strcase v0.0.0-20190707081139-fae4a99e1218 h1:7Ku6SM7mXEOq+lUrjebiW94aED5tCTifP56HTNrWN3M=
 github.com/bingoohuang/strcase v0.0.0-20190707081139-fae4a99e1218/go.mod h1:WYrcjWhT2QgbWZcYzfYqWxaxut2hPFa6if/zYwEEEio=
 github.com/bingoohuang/strcase v0.0.0-20200312105414-ac2c85cfc85d h1:RkZ/6GrOw5MkrsMk/YKTkcmEF5z1CnjdaKaYCd9FJWQ=

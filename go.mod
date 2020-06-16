@@ -6,7 +6,7 @@ require (
 	github.com/Masterminds/goutils v1.1.0
 	github.com/alecthomas/chroma v0.7.1
 	github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272
-	github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 // indirect
+	github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867 // indirect
 	github.com/bingoohuang/goreflect v0.0.0-20200307035238-25f6dd474d12 // indirect
 	github.com/bingoohuang/gou v0.0.0-20200225004418-9b3655665c46
 	github.com/bingoohuang/sqlx v0.0.0-20200401041240-bd7550bb241f

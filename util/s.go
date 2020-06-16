@@ -6,12 +6,12 @@ import "github.com/Masterminds/goutils"
 // verbose == 0 return ""
 // verbose == 1 return max(s, maxWidth)
 // verbose == 2 return full s
-// others return ""
+// others return "".
 func Abbr(s string, verbose, maxWidth int) string {
 	switch verbose {
-	case 2: // nolint gomnd
+	case 2: // nolint:gomnd
 		return s
-	case 1: // nolint gomnd
+	case 1:
 		v, _ := goutils.Abbreviate(s, maxWidth)
 		return v
 	default:

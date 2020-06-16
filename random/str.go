@@ -25,7 +25,7 @@ func StrZero() reflect.Type {
 }
 
 // Value ...
-// nolint gomnd
+// nolint:gomnd
 func (r *Str) Value() interface{} {
 	if r.allowNull && rand.Int63n(100) < model.NilFrequency {
 		return nil
@@ -75,8 +75,7 @@ func (r *Str) Value() interface{} {
 	*/
 	if FoldContains(r.characterSet, "latin1") {
 		latin1Encoder := encoding.ISO8859_1.NewEncoder()
-		s, err = latin1Encoder.String(s)
-		if err != nil {
+		if s, err = latin1Encoder.String(s); err != nil {
 			logrus.Panicf("failed to encode to latin1, error %v", err)
 		}
 	}

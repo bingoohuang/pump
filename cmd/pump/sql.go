@@ -78,7 +78,7 @@ func (a *App) executeSQLs(db *sql.DB, subSqls []string) {
 		logrus.Panicf("failed to begin %v", err)
 	}
 
-	defer func() { _ = tx.Commit() }() // nolint errcheck
+	defer func() { _ = tx.Commit() }()
 
 	for _, s := range subSqls {
 		r := sqlx.ExecSQL(tx, s, 3000, "NULL")
@@ -102,7 +102,7 @@ func (a *App) printResult(s string, r sqlx.ExecResult) {
 	t := table.NewWriter()
 	t.SetOutputMirror(os.Stdout)
 
-	cols := len(r.Headers) + 1 // nolint gomnd
+	cols := len(r.Headers) + 1
 	header := make(table.Row, cols)
 	header[0] = "#"
 
@@ -114,7 +114,7 @@ func (a *App) printResult(s string, r sqlx.ExecResult) {
 
 	for i, r := range r.Rows {
 		row := make(table.Row, cols)
-		row[0] = i + 1 // nolint gomnd
+		row[0] = i + 1
 
 		for j, c := range r {
 			row[j+1] = c

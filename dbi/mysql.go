@@ -3,10 +3,14 @@ package dbi
 import (
 	"database/sql"
 	"log"
+	"net"
 	"reflect"
 	"regexp"
 	"strings"
 	"time"
+
+	"github.com/go-sql-driver/mysql"
+	"github.com/spf13/viper"
 
 	"github.com/sirupsen/logrus"
 
@@ -72,7 +76,7 @@ func (c MyTableColumn) GetComment() string { return c.Comment }
 // GetRandomizer ...
 func (c MyTableColumn) GetRandomizer() model.Randomizer { return c.randomizer }
 
-// GetCharacterSet returns the CharacterSet of the column
+// GetCharacterSet returns the CharacterSet of the column.
 func (c MyTableColumn) GetCharacterSet() string { return c.CharacterSet }
 
 // MySQLSchema ...
@@ -90,6 +94,24 @@ var _ model.DBSchema = (*MySQLSchema)(nil)
 func CreateMySQLSchema(dataSourceName string) (*MySQLSchema, error) {
 	ds := sqlx.CompatibleMySQLDs(dataSourceName)
 	more := sqlx.NewSQLMore("mysql", ds)
+
+	// https://stackoverflow.com/questions/33768557/how-to-bind-an-http-client-in-go-to-an-ip-address
+	if bindAddress := viper.GetString("bindAddress"); bindAddress != "" {
+		localAddr, err := net.ResolveIPAddr("ip", bindAddress)
+		if err != nil {
+			panic(err)
+		}
+
+		// nolint:gomnd
+		nd := net.Dialer{
+			LocalAddr: &net.TCPAddr{IP: localAddr.IP},
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}
+
+		// https://gist.github.com/jayjanssen/8e74bc4c5bdefc880ffd
+		mysql.RegisterDial(`tcp`, func(addr string) (net.Conn, error) { return nd.Dial(`tcp`, addr) })
+	}
 
 	return &MySQLSchema{
 		dbFn:          more.OpenE,
@@ -176,7 +198,7 @@ func (m MySQLSchema) TableColumns(table string) ([]model.TableColumn, error) {
 	return ts, nil
 }
 
-// ParseTable parses the schema and table name from table which may be like db1.t1
+// ParseTable parses the schema and table name from table which may be like db1.t1.
 func ParseTable(table string) (schemaName, tableName string) {
 	if strings.Contains(table, ".") {
 		return str.Split2(table, ".", true, true)
@@ -302,7 +324,7 @@ func makeRandomizerMap(columns []model.TableColumn) map[string]model.Randomizer 
 	return randMap
 }
 
-// nolint gomnd
+// nolint:gomnd
 func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 	sub := m.pumpOptionReg.FindStringSubmatch(c.GetComment())
 	pumpOption := ""
@@ -357,7 +379,7 @@ func (m MySQLSchema) makeColumnRandomizer(c MyTableColumn) model.Randomizer {
 	})
 }
 
-// SetVerbose set verbose mode
+// SetVerbose set verbose mode.
 func (m *MySQLSchema) SetVerbose(verbose int) {
 	m.verbose = verbose
 
@@ -367,7 +389,7 @@ func (m *MySQLSchema) SetVerbose(verbose int) {
 }
 
 // IsAutoIncrement tells if the col is auto_increment or not.
-// eg. create table a.ta(id int auto_increment, name varchar(10), age int, primary key(id));
+// eg. create table a.ta(id int auto_increment, name varchar(10), age int, primary key(id)).
 func (c MyTableColumn) IsAutoIncrement() bool {
 	return strings.Contains(c.Extra, "auto_increment")
 }
@@ -396,7 +418,7 @@ func (c MyTableColumn) zeroType() reflect.Type {
 	return reflect.TypeOf(nil)
 }
 
-// nolint gomnd
+// nolint:gomnd
 func (c MyTableColumn) randomColumn() model.Randomizer {
 	typ := c.GetDataType()
 	switch typ {

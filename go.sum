@@ -38,8 +38,8 @@ github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272 h1:p6XGOu/+B2OTx
 github.com/bingoohuang/faker v0.0.0-20191122080657-247fa98a3272/go.mod h1:aafm3JdahinaC7Ell7InYRUNCLGqIQbaBO+HIHaU4f8=
 github.com/bingoohuang/gonet v0.0.0-20190716021716-fd516efe8b31 h1:/tBafxR0LKZAuic6BtklbnHKLoXHoiQ3ZsUm6evWaJM=
 github.com/bingoohuang/gonet v0.0.0-20190716021716-fd516efe8b31/go.mod h1:lSe5gMXAiQESg/xTshM6sByKvDkMGdDffZSXt0d64JI=
-github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2 h1:vbD/5qZGTrupyNMoEpadYaN7vLh6yn03mxZSroHtA5A=
-github.com/bingoohuang/gonet v0.0.0-20191125104325-28d67509f1a2/go.mod h1:vNeu6I/zpzA/kYOF6I8pOt4EtmmFTa1JhZ1YOl5IFn4=
+github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867 h1:nTpvasFEkYs1MCAdVNUoPfwGlPjGDwCtPNautAKWWpE=
+github.com/bingoohuang/gonet v0.0.0-20200511075259-cef8ac6cd867/go.mod h1:6rpAU/HWrk2XJFlVVfc+VrqExeGmuJ8X2AhYomb6n98=
 github.com/bingoohuang/gor v0.0.0-20200321095356-94cf6290c6ea h1:DGdKt4f+BciAcqlJ7v7LHCTO3wXBqeItwaLXKea4GjI=
 github.com/bingoohuang/gor v0.0.0-20200321095356-94cf6290c6ea/go.mod h1:ahEOivpxL+rGjwq6hk2H8aQEMh/Uc6r1N3ohugldIww=
 github.com/bingoohuang/goreflect v0.0.0-20200220033105-a0faf449f649 h1:Y4Un87LBj9Aae4MlLTWH/aGzhrwgk4pYlMduw8gNmNw=
@@ -377,6 +377,8 @@ golang.org/x/net v0.0.0-20190503192946-f4e77d36d62c/go.mod h1:t9HGtf8HONx5eT2rtn
 golang.org/x/net v0.0.0-20190522155817-f3200d17e092/go.mod h1:HSz+uSET+XFnRR8LxR5pz3Of3rY3CfYBVs4xY44aLks=
 golang.org/x/net v0.0.0-20190603091049-60506f45cf65 h1:+rhAzEzT3f4JtomfC371qB+0Ola2caSKcY69NUBZrRQ=
 golang.org/x/net v0.0.0-20190603091049-60506f45cf65/go.mod h1:HSz+uSET+XFnRR8LxR5pz3Of3rY3CfYBVs4xY44aLks=
+golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553 h1:efeOvDhwQ29Dj3SdAV/MJf8oukgn+8D8WgaCaRMchF8=
+golang.org/x/net v0.0.0-20191209160850-c0dbc17a3553/go.mod h1:z5CRVTTTmAJ677TzLLGU+0bjPO0LkuOLi4/5GtJWs/s=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/oauth2 v0.0.0-20190226205417-e64efc72b421/go.mod h1:gOpvHmFTYa4IltrdGE7lF6nIHvwfUNPOp7c8zoXwtLw=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=

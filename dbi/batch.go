@@ -67,7 +67,7 @@ func NewInsertBatch(table string, columnNames []string, batchNum int, db *sql.DB
 	return b
 }
 
-// GetBatchNum returns the batch num
+// GetBatchNum returns the batch num.
 func (b InsertBatcher) GetBatchNum() int { return b.batchNum }
 
 func (b *InsertBatcher) setSleepDuration() {

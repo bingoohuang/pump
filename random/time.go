@@ -19,7 +19,7 @@ func TimeZero() reflect.Type {
 }
 
 // Value ...
-// nolint gomnd
+// nolint:gomnd
 func (r *Time) Value() interface{} {
 	if r.allowNull && rand.Int63n(100) < model.NilFrequency {
 		return nil

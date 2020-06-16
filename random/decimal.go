@@ -8,7 +8,7 @@ import (
 	"github.com/bingoohuang/pump/model"
 )
 
-// Decimal holds unexported data for decimal values
+// Decimal holds unexported data for decimal values.
 type Decimal struct {
 	size      int
 	allowNull bool
@@ -16,7 +16,7 @@ type Decimal struct {
 
 // DecimalZero ...
 func DecimalZero() reflect.Type {
-	return reflect.TypeOf(0.0) // nolint gomnd
+	return reflect.TypeOf(0.0) // nolint:gomnd
 }
 
 // Value ...

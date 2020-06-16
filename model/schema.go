@@ -73,7 +73,7 @@ type RowsPumped struct {
 	bar *uiprogress.Bar
 }
 
-// MakeRowsPumped makes a new RowsPumped
+// MakeRowsPumped makes a new RowsPumped.
 func MakeRowsPumped(pumpTable string, totalRows int) *RowsPumped {
 	start := time.Now()
 	bar := uiprogress.AddBar(totalRows).AppendCompleted().PrependFunc(func(b *uiprogress.Bar) string {

@@ -21,7 +21,7 @@ func MakeRuneRandom() *RuneRandom {
 }
 
 // Rune ...
-// nolint gomnd
+// nolint:gomnd
 func (rr *RuneRandom) Rune(maxSize int) string {
 	r := rand.New(rand.NewSource(time.Now().UnixNano()))
 

@@ -2,7 +2,7 @@ package util
 
 import (
 	"fmt"
-	_ "net/http/pprof" // nolint gosec
+	_ "net/http/pprof" // nolint:gosec
 	"os"
 
 	"github.com/bingoohuang/gou/cnf"
@@ -19,6 +19,8 @@ func InitFlags() {
 	pflag.StringP("onerr", "", "retry", "retry on error or not")
 	pflag.IntP("retry", "", 0, "retry max times")
 	pflag.StringP("fmt", "f", "txt", "query sql execution result printing format(txt/markdown/html/csv)")
+	// https://dev.mysql.com/doc/refman/5.7/en/mysql-command-options.html#option_mysql_bind-address
+	pflag.StringP("bindAddress", "b", "", "Use specified network interface to connect to MySQL Server")
 
 	pflag.StringP("ds", "d", "", `eg.
 	MYSQL_PWD=8BE4 mysql -h 127.0.0.1 -P 9633 -u root

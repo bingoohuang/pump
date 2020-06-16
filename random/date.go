@@ -18,7 +18,7 @@ func DateZero() reflect.Type {
 }
 
 // Value ...
-// nolint gomnd
+// nolint:gomnd
 func (r *Date) Value() interface{} {
 	var random time.Duration
 

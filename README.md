@@ -1,7 +1,8 @@
 # pump
+
 pump random data into tables
 
-Build:  `make install` or `make installlinux`
+Build: `make install` or `make installlinux`
 
 examples:
 

@@ -51,14 +51,14 @@ func NewInsertBatch(table string, columnNames []string, batchNum int, db *sql.DB
 	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 
 	bind := "(" + str.Repeat("?", ",", b.columnCount) + ")"
-	sql := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
-	b.batchSQL = sql + str.Repeat(bind, ",", batchNum)
+	s := "insert into " + table + "(" + strings.Join(columnNames, ",") + ") values"
+	b.batchSQL = s + str.Repeat(bind, ",", batchNum)
 
 	if verbose > 0 && batchNum >= rows {
 		logrus.Infof("batchSQL:%s", util.Abbr(b.batchSQL, verbose, 500))
 	}
 
-	b.completeSQL = func() string { return sql + str.Repeat(bind, ",", b.rowsCount) }
+	b.completeSQL = func() string { return s + str.Repeat(bind, ",", b.rowsCount) }
 	b.batchOp = batchOp
 	b.verbose = verbose
 

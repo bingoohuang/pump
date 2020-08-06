@@ -254,9 +254,9 @@ func (r *retryState) retry(err error) (bool, error) {
 		return false, err
 	}
 
-	if r.verbose > 0 {
-		logrus.Warnf("retry %d after error %v", r.retries, err)
-	}
+	//if r.verbose > 0 {
+	logrus.Warnf("retry %d after error %v", r.retries, err)
+	//}
 
 	if r.retryMaxTimes <= 0 {
 		return true, nil

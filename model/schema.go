@@ -77,7 +77,8 @@ type RowsPumped struct {
 func MakeRowsPumped(pumpTable string, totalRows int) *RowsPumped {
 	start := time.Now()
 	bar := uiprogress.AddBar(totalRows).AppendCompleted().PrependFunc(func(b *uiprogress.Bar) string {
-		return fmt.Sprintf("%s %d/%d %v", pumpTable, b.Current(), totalRows, time.Since(start))
+		return fmt.Sprintf("%s %d/%d %v", pumpTable, b.Current(),
+			totalRows, time.Since(start).Round(time.Second))
 	})
 
 	return &RowsPumped{

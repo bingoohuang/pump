@@ -9,8 +9,7 @@ import (
 )
 
 // Date structured a date randomizer.
-type Date struct {
-}
+type Date struct{}
 
 // DateZero ...
 func DateZero() reflect.Type {

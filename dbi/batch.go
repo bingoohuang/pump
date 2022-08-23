@@ -46,7 +46,8 @@ type InsertBatcher struct {
 
 // NewInsertBatch ...
 func NewInsertBatch(table string, columnNames []string, batchNum int, db *sql.DB,
-	batchOp func(int), verbose, rows int) *InsertBatcher {
+	batchOp func(int), verbose, rows int,
+) *InsertBatcher {
 	b := &InsertBatcher{batchNum: batchNum, db: db, columnCount: len(columnNames)}
 	b.rows = make([]interface{}, 0, b.batchNum*b.columnCount)
 

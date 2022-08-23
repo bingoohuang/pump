@@ -45,7 +45,7 @@ func (a *App) executeSqls() {
 	defer os.Exit(0)
 
 	db := sqlx.NewSQLMore("mysql", a.schema.CompatibleDs()).Open()
-	//db, _ := sql.Open("mysql", a.schema.CompatibleDs())
+	// db, _ := sql.Open("mysql", a.schema.CompatibleDs())
 	defer db.Close()
 
 	if len(subSqls) > 0 {
@@ -81,7 +81,7 @@ func (a *App) executeSQLs(db *sql.DB, subSqls []string) {
 	defer func() { _ = tx.Commit() }()
 
 	for _, s := range subSqls {
-		r := sqlx.ExecSQL(tx, s, 3000, "NULL")
+		r := sqlx.ExecSQL(tx, s, sqlx.ExecOption{MaxRows: 3000, NullReplace: "NULL"})
 		a.printResult(s, r)
 	}
 }

@@ -33,8 +33,7 @@ type TableColumn interface {
 }
 
 // PumpColumnConfig  ...
-type PumpColumnConfig struct {
-}
+type PumpColumnConfig struct{}
 
 // PumpConfig ...
 type PumpConfig struct {

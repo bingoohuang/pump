@@ -187,7 +187,8 @@ func ParseTable(table string) (schemaName, tableName string) {
 
 // Pump ...
 func (m MySQLSchema) Pump(table string, rowsPumped chan<- model.RowsPumped, config model.PumpConfig,
-	ready chan bool, onerr string, retryMaxTimes int) error {
+	ready chan bool, onerr string, retryMaxTimes int,
+) error {
 	columns, err := m.TableColumns(table)
 	if err != nil {
 		return err
@@ -254,7 +255,7 @@ func (r *retryState) retry(err error) (bool, error) {
 		return false, err
 	}
 
-	//if r.verbose > 0 {
+	// if r.verbose > 0 {
 	logrus.Warnf("retry %d after error %v", r.retries, err)
 	//}
 
